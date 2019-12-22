@@ -1,12 +1,14 @@
 ﻿Imports System.Text.RegularExpressions
 
 Public Class OCRemix
-    Private Const baseUrl As String = "https://ocremix.org/remix/OCR"
+    Private Const baseUrl As String = "https://ocremix.org/remix/"
 
     Private _number As Integer                          'Constructor
+    Private _id As String                               'SET Number
     Private _url As String                              'SET Number
     Private _HTMLSource As String                       'getHTMLSource()
 
+    Private _mp3Name As String                          'getMetadata()
     Private _mp3Url As String                           'getMetadata()
 
     Private _GameName As String                         'getMetadata()
@@ -28,8 +30,14 @@ Public Class OCRemix
         End Get
         Set(value As Integer)
             _number = value
-            _url = baseUrl & Strings.Right("00000" & _number, 5)
+            _id = "OCR" & Strings.Right("00000" & _number, 5)
+            _url = baseUrl & _id
         End Set
+    End Property
+    Public ReadOnly Property Id As String
+        Get
+            Return _id
+        End Get
     End Property
     Public ReadOnly Property Url As String
         Get
@@ -42,6 +50,11 @@ Public Class OCRemix
         End Get
     End Property
 
+    Public ReadOnly Property Mp3Name As String
+        Get
+            Return _mp3Name
+        End Get
+    End Property
     Public ReadOnly Property Mp3Url As String
         Get
             Return _mp3Url
@@ -58,19 +71,35 @@ Public Class OCRemix
             Return _RemixName
         End Get
     End Property
-    Public ReadOnly Property RemixRemixer As List(Of String)
+    Public ReadOnly Property RemixRemixer As String
         Get
-            Return _RemixRemixer
+            Dim retval As String = ""
+
+            For Each item In _RemixRemixer
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
-    Public ReadOnly Property RemixPosted As Date
+    Public ReadOnly Property RemixPosted As String
         Get
-            Return _RemixPosted
+            Return _RemixPosted.ToString("yyyy-MM-dd")
         End Get
     End Property
-    Public ReadOnly Property GameSong As List(Of String)
+    Public ReadOnly Property GameSong As String
         Get
-            Return _GameSong
+            Dim retval As String = ""
+
+            For Each item In _GameSong
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
     Public ReadOnly Property GameOrganisation As String
@@ -88,24 +117,56 @@ Public Class OCRemix
             Return _GameSystem
         End Get
     End Property
-    Public ReadOnly Property GameComposer As List(Of String)
+    Public ReadOnly Property GameComposer As String
         Get
-            Return _GameComposer
+            Dim retval As String = ""
+
+            For Each item In _GameComposer
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
-    Public ReadOnly Property TagsGenre As List(Of String)
+    Public ReadOnly Property TagsGenre As String
         Get
-            Return _TagsGenre
+            Dim retval As String = ""
+
+            For Each item In _TagsGenre
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
-    Public ReadOnly Property TagsMood As List(Of String)
+    Public ReadOnly Property TagsMood As String
         Get
-            Return _TagsMood
+            Dim retval As String = ""
+
+            For Each item In _TagsMood
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
-    Public ReadOnly Property TagsInstrumentation As List(Of String)
+    Public ReadOnly Property TagsInstrumentation As String
         Get
-            Return _TagsInstrumentation
+            Dim retval As String = ""
+
+            For Each item In _TagsInstrumentation
+                retval &= item & ", "
+            Next
+
+            retval = Regex.Replace(retval, ", $", "")
+
+            Return retval
         End Get
     End Property
 
@@ -183,6 +244,7 @@ finish:
 
         ' _mp3url
         _mp3Url = Regex.Match(_HTMLSource, "<dt class=""col-sm-3 text-right"">Name:<\/dt>\s?<dd class=""col-sm-9""><span class=""single-line-item"">(?'mp3'.*?\.mp3)<\/span><\/dd>\s?<dt class=""col-sm-3 text-right"">Size:<\/dt>", RegexOptions.IgnoreCase).Groups("mp3").Value
+        _mp3Name = _mp3Url
         If _mp3Url <> "" Then
             _mp3Url = INmySettings.DownloadFrom & "/" & _mp3Url
         End If
@@ -240,9 +302,91 @@ finish:
         ' _TagsInstrumentation
         temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("instrument").Value
         If temp <> "" Then _TagsInstrumentation = temp.Replace(", ", ",").Split(",").ToList
+    End Sub
 
-        ' MsgBox("MP3url: " & Mp3Url & vbCrLf &
-        '     "GameName: " & _GameName & vbCrLf &
-        '     "RemixName: " & _RemixName)
+    Public Sub download(mySettings As Settings)
+        Dim wc As Net.WebClient = New Net.WebClient()
+        wc.Encoding = System.Text.Encoding.UTF8
+
+        ' Build path to download the file to
+        Dim toFile As String
+
+        If (mySettings.CreateSubdirectories = "") Then
+            toFile = mySettings.DownloadTo & "\" & Me.Mp3Name
+        Else
+            toFile = mySettings.DownloadTo & "\" & mySettings.CreateSubdirectories
+
+            toFile = toFile.Replace("%mp3file%", Me.Mp3Name)
+
+            toFile = toFile.Replace("%game_composer%", Me.GameComposer)
+            toFile = toFile.Replace("%game_name%", Me.GameName)
+            toFile = toFile.Replace("%game_organisation%", Me.GameOrganisation)
+            toFile = toFile.Replace("%game_song%", Me.GameSong)
+            toFile = toFile.Replace("%game_system%", Me.GameSystem)
+            toFile = toFile.Replace("%game_year%", Me.GameYear)
+
+            toFile = toFile.Replace("%remix_id%", Me.Id)
+            toFile = toFile.Replace("%remix_name%", Me.RemixName)
+            toFile = toFile.Replace("%remix_posted%", Me.RemixPosted)
+            toFile = toFile.Replace("%remix_remixer%", Me.RemixRemixer)
+
+            toFile = toFile.Replace("%tags_genre%", Me.TagsGenre)
+            toFile = toFile.Replace("%tags_instrument%", Me.TagsInstrumentation)
+            toFile = toFile.Replace("%tags_mood%", Me.TagsMood)
+        End If
+
+        ' create path to download file to
+        Dim path As String = My.Computer.FileSystem.GetParentPath(toFile)
+
+        If (My.Computer.FileSystem.DirectoryExists(path) = False) Then
+            My.Computer.FileSystem.CreateDirectory(path)
+        End If
+
+        ' test security protocols
+        Try
+            wc.DownloadFile(Me._mp3Url, toFile)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Ssl3
+            wc.DownloadFile(Me._mp3Url, toFile)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls
+            wc.DownloadFile(Me._mp3Url, toFile)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls11
+            wc.DownloadFile(Me._mp3Url, toFile)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls12
+            wc.DownloadFile(Me._mp3Url, toFile)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+finish:
     End Sub
 End Class

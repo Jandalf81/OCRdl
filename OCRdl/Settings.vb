@@ -2,6 +2,7 @@
     Private _downloadTo As String
     Private _lastSuccess As Integer
     Private _downloadFrom As String
+    Private _createSubdirectories As String
 
     Public Property DownloadTo As String
         Get
@@ -25,6 +26,14 @@
         End Get
         Set(value As String)
             _downloadFrom = value
+        End Set
+    End Property
+    Public Property CreateSubdirectories As String
+        Get
+            Return _createSubdirectories
+        End Get
+        Set(value As String)
+            _createSubdirectories = value
         End Set
     End Property
 
@@ -53,5 +62,6 @@
         Me.DownloadTo = ISettings.DownloadTo
         Me.LastSuccess = ISettings.LastSuccess
         Me.DownloadFrom = ISettings.DownloadFrom
+        Me.CreateSubdirectories = ISettings.CreateSubdirectories
     End Sub
 End Class

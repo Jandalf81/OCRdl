@@ -10,11 +10,14 @@
         bgw_Download.WorkerSupportsCancellation = True
 
         mySettings.Load()
-        txt_Settings_DownloadTo.Text = mySettings.DownloadTo
         cmb_Settings_DownloadFrom.SelectedItem = mySettings.DownloadFrom
+        txt_Settings_DownloadTo.Text = mySettings.DownloadTo
+        txt_Settings_CreateSubdirectories.Text = mySettings.CreateSubdirectories
     End Sub
 
     Private Sub frm_Main_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        mySettings.CreateSubdirectories = txt_Settings_CreateSubdirectories.Text
+
         mySettings.Save()
     End Sub
 #End Region
@@ -32,6 +35,7 @@
         If (fbd.ShowDialog() = DialogResult.OK) Then
             mySettings.DownloadTo = fbd.SelectedPath
             txt_Settings_DownloadTo.Text = mySettings.DownloadTo
+            txt_Settings_CreateSubdirectories.Text = mySettings.CreateSubdirectories
         End If
     End Sub
 
@@ -39,9 +43,38 @@
         mySettings.DownloadFrom = cmb_Settings_DownloadFrom.SelectedItem
     End Sub
 
+    Private Sub btn_Settings_CreateSubdirectories_Click(sender As Object, e As EventArgs) Handles btn_Settings_CreateSubdirectories.Click
+        ctx_Settings_CreateSubdirectories.Show(btn_Settings_CreateSubdirectories, New Point(16, 16))
+    End Sub
+
+    Private Sub mnu_Item_Click(sender As Object, e As EventArgs) Handles _
+            mnu_mp3file.Click,
+            mnu_GameComposer.Click,
+            mnu_GameName.Click,
+            mnu_GameOrganisation.Click,
+            mnu_GameSong.Click,
+            mnu_GameSystem.Click,
+            mnu_GameYear.Click,
+            mnu_RemixId.Click,
+            mnu_RemixName.Click,
+            mnu_RemixPosted.Click,
+            mnu_RemixRemixer.Click,
+            mnu_TagsInstrument.Click,
+            mnu_TagsMood.Click,
+            mnu_Tags_Genre.Click
+        Dim mnu_Item As ToolStripMenuItem = DirectCast(sender, ToolStripMenuItem)
+
+        txt_Settings_CreateSubdirectories.AppendText(mnu_Item.Text)
+        txt_Settings_CreateSubdirectories.Select()
+    End Sub
+
     Private Sub btn_Download_Click(sender As Object, e As EventArgs) Handles btn_Download.Click
         btn_Download.Enabled = False
         btn_Cancel.Enabled = True
+
+        mySettings.CreateSubdirectories = txt_Settings_CreateSubdirectories.Text
+        mySettings.Save()
+
         bgw_Download.RunWorkerAsync()
     End Sub
 
@@ -68,6 +101,8 @@
             If myOCRemix.getHTMLSource() = True Then
                 addToLog(vbTab & "HTML page found!")
                 myOCRemix.getMetadata(mySettings)
+
+                myOCRemix.download(mySettings)
             Else
                 addToLog(vbTab & "no HTML page found, skipping...")
             End If
