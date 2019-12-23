@@ -78,6 +78,7 @@ Partial Class frm_Main
         '
         'btn_Settings_CreateSubdirectories
         '
+        Me.btn_Settings_CreateSubdirectories.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btn_Settings_CreateSubdirectories.Location = New System.Drawing.Point(727, 64)
         Me.btn_Settings_CreateSubdirectories.Name = "btn_Settings_CreateSubdirectories"
         Me.btn_Settings_CreateSubdirectories.Size = New System.Drawing.Size(65, 23)
@@ -87,6 +88,8 @@ Partial Class frm_Main
         '
         'txt_Settings_CreateSubdirectories
         '
+        Me.txt_Settings_CreateSubdirectories.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.txt_Settings_CreateSubdirectories.Location = New System.Drawing.Point(154, 66)
         Me.txt_Settings_CreateSubdirectories.Name = "txt_Settings_CreateSubdirectories"
         Me.txt_Settings_CreateSubdirectories.Size = New System.Drawing.Size(566, 20)

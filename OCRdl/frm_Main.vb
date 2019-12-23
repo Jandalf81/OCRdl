@@ -79,6 +79,8 @@
     End Sub
 
     Private Sub btn_Cancel_Click(sender As Object, e As EventArgs) Handles btn_Cancel.Click
+        btn_Cancel.Text = "Canceling..."
+
         bgw_Download.CancelAsync()
     End Sub
 #End Region
@@ -89,22 +91,34 @@
 
         Do
             If bgw_Download.CancellationPending = True Then
-                addToLog("Operation canceled by user")
+                addToLog("INFO" & vbTab & "Operation canceled by user")
                 Exit Sub
             End If
 
-            addToLog("now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
+            addToLog("INFO" & vbTab & "now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
 
             myOCRemix = New OCRemix(currentOCR)
-            addToLog(vbTab & "Trying to get site from " & myOCRemix.Url & "...")
+            addToLog("INFO" & vbTab & vbTab & "trying to get HTML page from " & myOCRemix.Url & "...")
 
-            If myOCRemix.getHTMLSource() = True Then
-                addToLog(vbTab & "HTML page found!")
+            If (myOCRemix.getHTMLSource() = 0) Then
+                addToLog("INFO" & vbTab & vbTab & "HTML page found!")
                 myOCRemix.getMetadata(mySettings)
 
-                myOCRemix.download(mySettings)
+                addToLog("INFO" & vbTab & vbTab & "trying to download file from " & myOCRemix.Mp3Url & "...")
+                If (myOCRemix.download(mySettings) = 0) Then
+                    addToLog("INFO" & vbTab & vbTab & "download successful!")
+
+                    addToLog("INFO" & vbTab & vbTab & "trying to save the metadata...")
+                    If (myOCRemix.saveMetadata() = 0) Then
+                        addToLog("INFO" & vbTab & vbTab & "metadata saved successfully!")
+                    Else
+                        addToLog("ERROR" & vbTab & vbTab & "Error while saving metadata!")
+                    End If
+                Else
+                    addToLog("ERROR" & vbTab & vbTab & "Error while downloading")
+                End If
             Else
-                addToLog(vbTab & "no HTML page found, skipping...")
+                addToLog("WARN" & vbTab & vbTab & "no HTML page found, skipping...")
             End If
 
             System.Threading.Thread.Sleep(1000)

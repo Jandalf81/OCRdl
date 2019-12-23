@@ -10,6 +10,7 @@ Public Class OCRemix
 
     Private _mp3Name As String                          'getMetadata()
     Private _mp3Url As String                           'getMetadata()
+    Private _mp3LocalFile As String                     'download()
 
     Private _GameName As String                         'getMetadata()
     Private _RemixName As String                        'getMetadata()
@@ -58,6 +59,11 @@ Public Class OCRemix
     Public ReadOnly Property Mp3Url As String
         Get
             Return _mp3Url
+        End Get
+    End Property
+    Public ReadOnly Property Mp3LocalFile As String
+        Get
+            Return _mp3LocalFile
         End Get
     End Property
 
@@ -174,7 +180,7 @@ Public Class OCRemix
         Me.Number = INnumber
     End Sub
 
-    Public Function getHTMLSource() As Boolean
+    Public Function getHTMLSource() As Integer
         Dim wc As Net.WebClient = New Net.WebClient()
         Dim retval As String = ""
 
@@ -225,15 +231,13 @@ Public Class OCRemix
 
         End Try
 
+        Return -1
+
 finish:
         retval = System.Text.RegularExpressions.Regex.Replace(retval, "\r\n|\r|\n", "")
         _HTMLSource = retval
 
-        If retval <> "" Then
-            Return True
-        Else
-            Return False
-        End If
+        Return 0
     End Function
 
     Public Sub getMetadata(INmySettings As Settings)
@@ -304,7 +308,7 @@ finish:
         If temp <> "" Then _TagsInstrumentation = temp.Replace(", ", ",").Split(",").ToList
     End Sub
 
-    Public Sub download(mySettings As Settings)
+    Public Function download(mySettings As Settings) As Integer
         Dim wc As Net.WebClient = New Net.WebClient()
         wc.Encoding = System.Text.Encoding.UTF8
 
@@ -334,6 +338,7 @@ finish:
             toFile = toFile.Replace("%tags_instrument%", Me.TagsInstrumentation)
             toFile = toFile.Replace("%tags_mood%", Me.TagsMood)
         End If
+        _mp3LocalFile = toFile
 
         ' create path to download file to
         Dim path As String = My.Computer.FileSystem.GetParentPath(toFile)
@@ -387,6 +392,70 @@ finish:
 
         End Try
 
+        Return -1
 finish:
-    End Sub
+        Return 0
+    End Function
+
+    Public Function saveMetadata() As Integer
+        Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
+        Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
+        Dim custom As TagLib.Id3v2.UserTextInformationFrame
+
+        Try
+            'mp3.RemoveTags(TagLib.TagTypes.Id3v2) ' removes the ability to add custom tags!
+            'mp3.Tag.Pictures = Nothing ' does not remove the image from the file!
+
+            mp3.Tag.Performers = Me._RemixRemixer.ToArray
+            mp3.Tag.Title = Me._RemixName
+            mp3.Tag.Album = Me._GameName
+            mp3.Tag.Year = Me._GameYear
+            mp3.Tag.Genres = Me._TagsGenre.ToArray
+            mp3.Tag.Composers = {"Video Game Remixes"}
+            mp3.Tag.AlbumArtists = {Me._GameSystem}
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_NAME", TagLib.StringType.UTF16)
+            custom.Text = {Me._GameName}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_SONG", TagLib.StringType.UTF16)
+            custom.Text = Me._GameSong.ToArray
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_SYSTEM", TagLib.StringType.UTF16)
+            custom.Text = {Me._GameSystem}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_ORGANISATION", TagLib.StringType.UTF16)
+            custom.Text = {Me._GameOrganisation}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("ID", TagLib.StringType.UTF16)
+            custom.Text = {Me._id}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("REMIX_POSTED", TagLib.StringType.UTF16)
+            custom.Text = {Me.RemixPosted}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("SOURCE", TagLib.StringType.UTF16)
+            custom.Text = {"https://ocremix.org/"}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("MOOD", TagLib.StringType.UTF16)
+            custom.Text = Me._TagsMood.ToArray
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("INSTRUMENTS", TagLib.StringType.UTF16)
+            custom.Text = Me._TagsInstrumentation.ToArray
+            tag.AddFrame(custom)
+
+            mp3.Save()
+            mp3.Dispose()
+        Catch
+            Return -1
+        End Try
+
+        Return 0
+    End Function
 End Class
