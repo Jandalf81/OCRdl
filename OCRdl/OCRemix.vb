@@ -180,6 +180,7 @@ Public Class OCRemix
         Me.Number = INnumber
     End Sub
 
+    ' ToDo make this raise an error
     Public Function getHTMLSource() As Integer
         Dim wc As Net.WebClient = New Net.WebClient()
         Dim retval As String = ""
@@ -240,6 +241,7 @@ finish:
         Return 0
     End Function
 
+    ' ToDo make this raise an error
     Public Sub getMetadata(INmySettings As Settings)
         Dim mc As MatchCollection
         Dim temp As String
@@ -308,6 +310,7 @@ finish:
         If temp <> "" Then _TagsInstrumentation = temp.Replace(", ", ",").Split(",").ToList
     End Sub
 
+    ' ToDo make this raise an error
     Public Function download(mySettings As Settings) As Integer
         Dim wc As Net.WebClient = New Net.WebClient()
         wc.Encoding = System.Text.Encoding.UTF8
@@ -397,22 +400,29 @@ finish:
         Return 0
     End Function
 
+    ' ToDo make this raise an error
     Public Function saveMetadata() As Integer
-        Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
-        Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
-        Dim custom As TagLib.Id3v2.UserTextInformationFrame
-
         Try
-            'mp3.RemoveTags(TagLib.TagTypes.Id3v2) ' removes the ability to add custom tags!
-            'mp3.Tag.Pictures = Nothing ' does not remove the image from the file!
+            Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
+            Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
+            Dim custom As TagLib.Id3v2.UserTextInformationFrame
 
-            mp3.Tag.Performers = Me._RemixRemixer.ToArray
-            mp3.Tag.Title = Me._RemixName
-            mp3.Tag.Album = Me._GameName
-            mp3.Tag.Year = Me._GameYear
-            mp3.Tag.Genres = Me._TagsGenre.ToArray
-            mp3.Tag.Composers = {"Video Game Remixes"}
-            mp3.Tag.AlbumArtists = {Me._GameSystem}
+            ' remove all tags from file
+            mp3.RemoveTags(TagLib.TagTypes.AllTags) ' removes the ability to add custom tags!
+            mp3.Save()
+            mp3.Dispose()
+
+            ' re-open file to re-create tags
+            mp3 = TagLib.File.Create(Me._mp3LocalFile)
+            tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
+
+            tag.Performers = Me._RemixRemixer.ToArray
+            tag.Title = Me._RemixName
+            tag.Album = Me._GameName
+            tag.Year = Me._GameYear
+            tag.Genres = Me._TagsGenre.ToArray
+            tag.Composers = {"Video Game Remixes"}
+            tag.AlbumArtists = {Me._GameSystem}
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_NAME", TagLib.StringType.UTF16)
             custom.Text = {Me._GameName}
@@ -449,6 +459,9 @@ finish:
             custom = New TagLib.Id3v2.UserTextInformationFrame("INSTRUMENTS", TagLib.StringType.UTF16)
             custom.Text = Me._TagsInstrumentation.ToArray
             tag.AddFrame(custom)
+
+            ' re-remove ID3v1 tag
+            mp3.RemoveTags(TagLib.TagTypes.Id3v1)
 
             mp3.Save()
             mp3.Dispose()
