@@ -5,6 +5,12 @@
     Private _createSubdirectories As String
     Private _maxErrors As Integer
 
+    Public Property printDEBUG As Boolean
+    Public Property printSUCC As Boolean
+    Public Property printINFO As Boolean
+    Public Property printWARN As Boolean
+    Public Property printERROR As Boolean
+
     Public Property DownloadTo As String
         Get
             Return _downloadTo
@@ -73,5 +79,11 @@
         Me.DownloadFrom = ISettings.DownloadFrom
         Me.CreateSubdirectories = ISettings.CreateSubdirectories
         Me.MaxErrors = ISettings.MaxErrors
+
+        Me.printDEBUG = ISettings.printDEBUG
+        Me.printSUCC = ISettings.printSUCC
+        Me.printINFO = ISettings.printINFO
+        Me.printWARN = ISettings.printWARN
+        Me.printERROR = ISettings.printERROR
     End Sub
 End Class

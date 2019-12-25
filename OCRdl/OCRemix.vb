@@ -180,7 +180,7 @@ Public Class OCRemix
         Me.Number = INnumber
     End Sub
 
-    Public Function getHTMLSource()
+    Public Sub getHTMLSource()
         Dim wc As Net.WebClient = New Net.WebClient()
         Dim retval As String = ""
 
@@ -236,7 +236,7 @@ Public Class OCRemix
 finish:
         retval = System.Text.RegularExpressions.Regex.Replace(retval, "\r\n|\r|\n", "")
         _HTMLSource = retval
-    End Function
+    End Sub
 
     Public Sub getMetadata(INmySettings As Settings)
         Dim mc As MatchCollection
@@ -309,7 +309,7 @@ finish:
         End Try
     End Sub
 
-    Public Function download(mySettings As Settings)
+    Public Sub download(mySettings As Settings)
         Dim wc As Net.WebClient = New Net.WebClient()
         wc.Encoding = System.Text.Encoding.UTF8
 
@@ -319,7 +319,7 @@ finish:
         If (mySettings.CreateSubdirectories = "") Then
             toFile = mySettings.DownloadTo & "\" & Me.Mp3Name
         Else
-            toFile = mySettings.DownloadTo & "\" & mySettings.CreateSubdirectories
+            toFile = mySettings.CreateSubdirectories
 
             toFile = toFile.Replace("%mp3file%", Me.Mp3Name)
 
@@ -338,11 +338,13 @@ finish:
             toFile = toFile.Replace("%tags_genre%", Me.TagsGenre)
             toFile = toFile.Replace("%tags_instrument%", Me.TagsInstrumentation)
             toFile = toFile.Replace("%tags_mood%", Me.TagsMood)
-        End If
 
-        ' tidy up toFile
-        toFile = toFile.Replace(":", "_")
-        toFile = toFile.Replace("\", "_")
+            ' tidy up toFile
+            toFile = toFile.Replace(":", "_")
+            toFile = toFile.Replace("/", "_")
+
+            toFile = mySettings.DownloadTo & "\" & toFile
+        End If
 
         _mp3LocalFile = toFile
 
@@ -400,9 +402,9 @@ finish:
 
         Throw New DownloadException("file could not be downloaded")
 finish:
-    End Function
+    End Sub
 
-    Public Function saveMetadata()
+    Public Sub saveMetadata()
         Try
             Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
             Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
@@ -469,7 +471,7 @@ finish:
         Catch
             Throw New SaveMetadataException("error while saving metadata")
         End Try
-    End Function
+    End Sub
 End Class
 
 Public Class GetHTMLException

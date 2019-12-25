@@ -1,4 +1,6 @@
-﻿Public Class frm_Main
+﻿Imports OCRdl.Log
+
+Public Class frm_Main
     Public mySettings As New Settings()
     Public myOCRemix As OCRemix
     Public myLog As Log
@@ -9,17 +11,36 @@
 
 #Region "GUI events"
     Private Sub frm_Main_Load(sender As Object, e As EventArgs) Handles Me.Load
+        myLog = New Log(txt_Log)
+
         bgw_Download.WorkerReportsProgress = True
         bgw_Download.WorkerSupportsCancellation = True
 
         mySettings.Load()
+
+        ' Settings2GUI
         cmb_Settings_DownloadFrom.SelectedItem = mySettings.DownloadFrom
         txt_Settings_DownloadTo.Text = mySettings.DownloadTo
         txt_Settings_CreateSubdirectories.Text = mySettings.CreateSubdirectories
         num_Settings_MaxErrors.Value = mySettings.MaxErrors
+
+        chk_Log_SUCC.Checked = mySettings.printSUCC
+        chk_Log_INFO.Checked = mySettings.printINFO
+        chk_Log_WARN.Checked = mySettings.printWARN
+        chk_Log_ERROR.Checked = mySettings.printERROR
+        chk_Log_DEBUG.Checked = mySettings.printDEBUG
+
+        myLog.printSUCC = mySettings.printSUCC
+        myLog.printINFO = mySettings.printINFO
+        myLog.printWARN = mySettings.printWARN
+        myLog.printERROR = mySettings.printERROR
+        myLog.printDEBUG = mySettings.printDEBUG
+
+        myLog.add(MessageLevel.INFO, "OCRdl started, last success was " & mySettings.LastSuccess)
     End Sub
 
     Private Sub frm_Main_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        ' GUI2Settings
         mySettings.CreateSubdirectories = txt_Settings_CreateSubdirectories.Text
 
         mySettings.Save()
@@ -87,9 +108,34 @@
     End Sub
 
     Private Sub btn_Cancel_Click(sender As Object, e As EventArgs) Handles btn_Cancel.Click
-        btn_Cancel.Text = "Canceling..."
+        btn_Cancel.Text = "Cancelling..."
 
         bgw_Download.CancelAsync()
+    End Sub
+
+    Private Sub chk_Log_SUCC_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Log_SUCC.CheckedChanged
+        mySettings.printSUCC = chk_Log_SUCC.Checked
+        myLog.printSUCC = mySettings.printSUCC
+    End Sub
+
+    Private Sub chk_Log_INFO_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Log_INFO.CheckedChanged
+        mySettings.printINFO = chk_Log_INFO.Checked
+        myLog.printINFO = mySettings.printINFO
+    End Sub
+
+    Private Sub chk_Log_WARN_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Log_WARN.CheckedChanged
+        mySettings.printWARN = chk_Log_WARN.Checked
+        myLog.printWARN = mySettings.printWARN
+    End Sub
+
+    Private Sub chk_Log_ERROR_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Log_ERROR.CheckedChanged
+        mySettings.printERROR = chk_Log_ERROR.Checked
+        myLog.printERROR = mySettings.printERROR
+    End Sub
+
+    Private Sub chk_Log_DEBUG_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Log_DEBUG.CheckedChanged
+        mySettings.printDEBUG = chk_Log_DEBUG.Checked
+        myLog.printDEBUG = mySettings.printDEBUG
     End Sub
 #End Region
 
@@ -101,44 +147,44 @@
         Do
             Try
                 If bgw_Download.CancellationPending = True Then
-                    addToLog("INFO" & vbTab & "Operation canceled by user")
+                    myLog.add(MessageLevel.INFO, "Operation canceled by user")
                     Exit Sub
                 End If
 
                 If (currentErrors >= mySettings.MaxErrors) Then
-                    addToLog("ERROR" & vbTab & "max errors reached!")
+                    myLog.add(MessageLevel.ERROR, "max errors reached!")
                     Exit Sub
                 End If
 
-                addToLog("INFO" & vbTab & "now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
+                myLog.add(MessageLevel.INFO, "now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
 
                 myOCRemix = New OCRemix(currentOCR)
 
-                addToLog("INFO" & vbTab & vbTab & "trying to get HTML page from " & myOCRemix.Url & "...")
+                myLog.add(MessageLevel.INFO, "trying to get HTML page from " & myOCRemix.Url & "...", 1)
                 myOCRemix.getHTMLSource()
-                addToLog("SUCC" & vbTab & vbTab & "HTML page found!")
+                myLog.add(MessageLevel.SUCC, "HTML page found!", 2)
 
-                addToLog("INFO" & vbTab & vbTab & "trying to get metadata from HTML page...")
+                myLog.add(MessageLevel.INFO, "trying to get metadata from HTML page...", 1)
                 myOCRemix.getMetadata(mySettings)
-                addToLog("SUCC" & vbTab & vbTab & "got metadata from HTML page!")
+                myLog.add(MessageLevel.SUCC, "got metadata from HTML page!", 2)
 
-                addToLog("INFO" & vbTab & vbTab & "trying to download file from " & myOCRemix.Mp3Url & "...")
+                myLog.add(MessageLevel.INFO, "trying to download file from " & myOCRemix.Mp3Url & "...", 1)
                 myOCRemix.download(mySettings)
-                addToLog("SUCC" & vbTab & vbTab & "download successful!")
+                myLog.add(MessageLevel.SUCC, "download successful!", 2)
 
-                addToLog("INFO" & vbTab & vbTab & "trying to save the metadata...")
+                myLog.add(MessageLevel.INFO, "trying to save the metadata...", 1)
                 myOCRemix.saveMetadata()
-                addToLog("SUCC" & vbTab & vbTab & "metadata saved successfully!")
+                myLog.add(MessageLevel.SUCC, "metadata saved successfully!", 2)
             Catch ex As GetHTMLException
                 currentErrors += 1
 
-                addToLog("WARN" & vbTab & vbTab & ex.Message & "(" & currentErrors & " / " & mySettings.MaxErrors & ")")
+                myLog.add(MessageLevel.WARN, ex.Message & "(" & currentErrors & " / " & mySettings.MaxErrors & ")", 2)
             Catch ex As GetMetadataException
-                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+                myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Catch ex As DownloadException
-                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+                myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Catch ex As SaveMetadataException
-                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+                myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Finally
                 System.Threading.Thread.Sleep(1000)
 
@@ -156,13 +202,4 @@
         btn_Cancel.Enabled = False
     End Sub
 #End Region
-
-
-    Private Sub addToLog(newMessage As String)
-        If Me.txt_Log.InvokeRequired Then
-            Me.Invoke(New DEL_addToLog(AddressOf _functions.addToLog), newMessage)
-        Else
-            _functions.addToLog(newMessage)
-        End If
-    End Sub
 End Class

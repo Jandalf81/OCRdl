@@ -105,7 +105,6 @@
     </Compile>
     <Compile Include="OCRemix.vb" />
     <Compile Include="Settings.vb" />
-    <Compile Include="_functions.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="frm_Main.resx">

@@ -24,6 +24,8 @@ Partial Class frm_Main
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.grp_Settings = New System.Windows.Forms.GroupBox()
+        Me.num_Settings_MaxErrors = New System.Windows.Forms.NumericUpDown()
+        Me.lbl_Settings_MaxErrors = New System.Windows.Forms.Label()
         Me.btn_Settings_CreateSubdirectories = New System.Windows.Forms.Button()
         Me.txt_Settings_CreateSubdirectories = New System.Windows.Forms.TextBox()
         Me.lbl_Settings_CreateSubdirectories = New System.Windows.Forms.Label()
@@ -32,7 +34,6 @@ Partial Class frm_Main
         Me.btn_Settings_DownloadTo = New System.Windows.Forms.Button()
         Me.lbl_Settings_DownloadTo = New System.Windows.Forms.Label()
         Me.txt_Settings_DownloadTo = New System.Windows.Forms.TextBox()
-        Me.txt_Log = New System.Windows.Forms.TextBox()
         Me.btn_Download = New System.Windows.Forms.Button()
         Me.btn_Cancel = New System.Windows.Forms.Button()
         Me.ctx_Settings_CreateSubdirectories = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -53,11 +54,17 @@ Partial Class frm_Main
         Me.mnu_Tags_Genre = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_TagsInstrument = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_TagsMood = New System.Windows.Forms.ToolStripMenuItem()
-        Me.lbl_Settings_MaxErrors = New System.Windows.Forms.Label()
-        Me.num_Settings_MaxErrors = New System.Windows.Forms.NumericUpDown()
+        Me.grp_Log = New System.Windows.Forms.GroupBox()
+        Me.txt_Log = New System.Windows.Forms.TextBox()
+        Me.chk_Log_SUCC = New System.Windows.Forms.CheckBox()
+        Me.chk_Log_INFO = New System.Windows.Forms.CheckBox()
+        Me.chk_Log_WARN = New System.Windows.Forms.CheckBox()
+        Me.chk_Log_ERROR = New System.Windows.Forms.CheckBox()
+        Me.chk_Log_DEBUG = New System.Windows.Forms.CheckBox()
         Me.grp_Settings.SuspendLayout()
-        Me.ctx_Settings_CreateSubdirectories.SuspendLayout()
         CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.ctx_Settings_CreateSubdirectories.SuspendLayout()
+        Me.grp_Log.SuspendLayout()
         Me.SuspendLayout()
         '
         'grp_Settings
@@ -76,10 +83,26 @@ Partial Class frm_Main
         Me.grp_Settings.Controls.Add(Me.txt_Settings_DownloadTo)
         Me.grp_Settings.Location = New System.Drawing.Point(12, 12)
         Me.grp_Settings.Name = "grp_Settings"
-        Me.grp_Settings.Size = New System.Drawing.Size(798, 178)
+        Me.grp_Settings.Size = New System.Drawing.Size(798, 122)
         Me.grp_Settings.TabIndex = 0
         Me.grp_Settings.TabStop = False
         Me.grp_Settings.Text = "Settings"
+        '
+        'num_Settings_MaxErrors
+        '
+        Me.num_Settings_MaxErrors.Location = New System.Drawing.Point(154, 91)
+        Me.num_Settings_MaxErrors.Name = "num_Settings_MaxErrors"
+        Me.num_Settings_MaxErrors.Size = New System.Drawing.Size(120, 20)
+        Me.num_Settings_MaxErrors.TabIndex = 9
+        '
+        'lbl_Settings_MaxErrors
+        '
+        Me.lbl_Settings_MaxErrors.AutoSize = True
+        Me.lbl_Settings_MaxErrors.Location = New System.Drawing.Point(6, 93)
+        Me.lbl_Settings_MaxErrors.Name = "lbl_Settings_MaxErrors"
+        Me.lbl_Settings_MaxErrors.Size = New System.Drawing.Size(120, 13)
+        Me.lbl_Settings_MaxErrors.TabIndex = 8
+        Me.lbl_Settings_MaxErrors.Text = "Max consecutive errors:"
         '
         'btn_Settings_CreateSubdirectories
         '
@@ -159,23 +182,11 @@ Partial Class frm_Main
         Me.txt_Settings_DownloadTo.Size = New System.Drawing.Size(566, 20)
         Me.txt_Settings_DownloadTo.TabIndex = 0
         '
-        'txt_Log
-        '
-        Me.txt_Log.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.txt_Log.Location = New System.Drawing.Point(12, 283)
-        Me.txt_Log.Multiline = True
-        Me.txt_Log.Name = "txt_Log"
-        Me.txt_Log.Size = New System.Drawing.Size(798, 301)
-        Me.txt_Log.TabIndex = 1
-        Me.txt_Log.WordWrap = False
-        '
         'btn_Download
         '
         Me.btn_Download.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Download.Location = New System.Drawing.Point(12, 196)
+        Me.btn_Download.Location = New System.Drawing.Point(12, 140)
         Me.btn_Download.Name = "btn_Download"
         Me.btn_Download.Size = New System.Drawing.Size(671, 46)
         Me.btn_Download.TabIndex = 2
@@ -185,7 +196,7 @@ Partial Class frm_Main
         'btn_Cancel
         '
         Me.btn_Cancel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Cancel.Location = New System.Drawing.Point(690, 196)
+        Me.btn_Cancel.Location = New System.Drawing.Point(696, 140)
         Me.btn_Cancel.Name = "btn_Cancel"
         Me.btn_Cancel.Size = New System.Drawing.Size(114, 46)
         Me.btn_Cancel.TabIndex = 3
@@ -307,39 +318,104 @@ Partial Class frm_Main
         Me.mnu_TagsMood.Size = New System.Drawing.Size(195, 22)
         Me.mnu_TagsMood.Text = "%tags_mood%"
         '
-        'lbl_Settings_MaxErrors
+        'grp_Log
         '
-        Me.lbl_Settings_MaxErrors.AutoSize = True
-        Me.lbl_Settings_MaxErrors.Location = New System.Drawing.Point(6, 93)
-        Me.lbl_Settings_MaxErrors.Name = "lbl_Settings_MaxErrors"
-        Me.lbl_Settings_MaxErrors.Size = New System.Drawing.Size(120, 13)
-        Me.lbl_Settings_MaxErrors.TabIndex = 8
-        Me.lbl_Settings_MaxErrors.Text = "Max consecutive errors:"
+        Me.grp_Log.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.grp_Log.Controls.Add(Me.chk_Log_DEBUG)
+        Me.grp_Log.Controls.Add(Me.chk_Log_ERROR)
+        Me.grp_Log.Controls.Add(Me.chk_Log_WARN)
+        Me.grp_Log.Controls.Add(Me.chk_Log_INFO)
+        Me.grp_Log.Controls.Add(Me.chk_Log_SUCC)
+        Me.grp_Log.Controls.Add(Me.txt_Log)
+        Me.grp_Log.Location = New System.Drawing.Point(12, 192)
+        Me.grp_Log.Name = "grp_Log"
+        Me.grp_Log.Size = New System.Drawing.Size(798, 392)
+        Me.grp_Log.TabIndex = 4
+        Me.grp_Log.TabStop = False
+        Me.grp_Log.Text = "Log"
         '
-        'num_Settings_MaxErrors
+        'txt_Log
         '
-        Me.num_Settings_MaxErrors.Location = New System.Drawing.Point(154, 91)
-        Me.num_Settings_MaxErrors.Name = "num_Settings_MaxErrors"
-        Me.num_Settings_MaxErrors.Size = New System.Drawing.Size(120, 20)
-        Me.num_Settings_MaxErrors.TabIndex = 9
+        Me.txt_Log.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txt_Log.Location = New System.Drawing.Point(6, 43)
+        Me.txt_Log.Multiline = True
+        Me.txt_Log.Name = "txt_Log"
+        Me.txt_Log.Size = New System.Drawing.Size(786, 343)
+        Me.txt_Log.TabIndex = 2
+        Me.txt_Log.WordWrap = False
+        '
+        'chk_Log_SUCC
+        '
+        Me.chk_Log_SUCC.AutoSize = True
+        Me.chk_Log_SUCC.Location = New System.Drawing.Point(9, 20)
+        Me.chk_Log_SUCC.Name = "chk_Log_SUCC"
+        Me.chk_Log_SUCC.Size = New System.Drawing.Size(71, 17)
+        Me.chk_Log_SUCC.TabIndex = 3
+        Me.chk_Log_SUCC.Text = "SUCCess"
+        Me.chk_Log_SUCC.UseVisualStyleBackColor = True
+        '
+        'chk_Log_INFO
+        '
+        Me.chk_Log_INFO.AutoSize = True
+        Me.chk_Log_INFO.Location = New System.Drawing.Point(125, 20)
+        Me.chk_Log_INFO.Name = "chk_Log_INFO"
+        Me.chk_Log_INFO.Size = New System.Drawing.Size(51, 17)
+        Me.chk_Log_INFO.TabIndex = 4
+        Me.chk_Log_INFO.Text = "INFO"
+        Me.chk_Log_INFO.UseVisualStyleBackColor = True
+        '
+        'chk_Log_WARN
+        '
+        Me.chk_Log_WARN.AutoSize = True
+        Me.chk_Log_WARN.Location = New System.Drawing.Point(218, 20)
+        Me.chk_Log_WARN.Name = "chk_Log_WARN"
+        Me.chk_Log_WARN.Size = New System.Drawing.Size(74, 17)
+        Me.chk_Log_WARN.TabIndex = 5
+        Me.chk_Log_WARN.Text = "WARNing"
+        Me.chk_Log_WARN.UseVisualStyleBackColor = True
+        '
+        'chk_Log_ERROR
+        '
+        Me.chk_Log_ERROR.AutoSize = True
+        Me.chk_Log_ERROR.Location = New System.Drawing.Point(328, 20)
+        Me.chk_Log_ERROR.Name = "chk_Log_ERROR"
+        Me.chk_Log_ERROR.Size = New System.Drawing.Size(65, 17)
+        Me.chk_Log_ERROR.TabIndex = 6
+        Me.chk_Log_ERROR.Text = "ERROR"
+        Me.chk_Log_ERROR.UseVisualStyleBackColor = True
+        '
+        'chk_Log_DEBUG
+        '
+        Me.chk_Log_DEBUG.AutoSize = True
+        Me.chk_Log_DEBUG.Location = New System.Drawing.Point(439, 20)
+        Me.chk_Log_DEBUG.Name = "chk_Log_DEBUG"
+        Me.chk_Log_DEBUG.Size = New System.Drawing.Size(64, 17)
+        Me.chk_Log_DEBUG.TabIndex = 7
+        Me.chk_Log_DEBUG.Text = "DEBUG"
+        Me.chk_Log_DEBUG.UseVisualStyleBackColor = True
         '
         'frm_Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(822, 596)
+        Me.Controls.Add(Me.grp_Log)
         Me.Controls.Add(Me.btn_Cancel)
         Me.Controls.Add(Me.btn_Download)
-        Me.Controls.Add(Me.txt_Log)
         Me.Controls.Add(Me.grp_Settings)
         Me.Name = "frm_Main"
         Me.Text = "OCRdl"
         Me.grp_Settings.ResumeLayout(False)
         Me.grp_Settings.PerformLayout()
-        Me.ctx_Settings_CreateSubdirectories.ResumeLayout(False)
         CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.ctx_Settings_CreateSubdirectories.ResumeLayout(False)
+        Me.grp_Log.ResumeLayout(False)
+        Me.grp_Log.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
 
@@ -347,7 +423,6 @@ Partial Class frm_Main
     Friend WithEvents btn_Settings_DownloadTo As Button
     Friend WithEvents lbl_Settings_DownloadTo As Label
     Friend WithEvents txt_Settings_DownloadTo As TextBox
-    Friend WithEvents txt_Log As TextBox
     Friend WithEvents btn_Download As Button
     Friend WithEvents btn_Cancel As Button
     Friend WithEvents cmb_Settings_DownloadFrom As ComboBox
@@ -375,4 +450,11 @@ Partial Class frm_Main
     Friend WithEvents mnu_TagsMood As ToolStripMenuItem
     Friend WithEvents num_Settings_MaxErrors As NumericUpDown
     Friend WithEvents lbl_Settings_MaxErrors As Label
+    Friend WithEvents grp_Log As GroupBox
+    Friend WithEvents chk_Log_DEBUG As CheckBox
+    Friend WithEvents chk_Log_ERROR As CheckBox
+    Friend WithEvents chk_Log_WARN As CheckBox
+    Friend WithEvents chk_Log_INFO As CheckBox
+    Friend WithEvents chk_Log_SUCC As CheckBox
+    Friend WithEvents txt_Log As TextBox
 End Class
