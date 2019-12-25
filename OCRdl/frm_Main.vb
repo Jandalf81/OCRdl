@@ -1,8 +1,11 @@
 ﻿Public Class frm_Main
     Public mySettings As New Settings()
+    Public myOCRemix As OCRemix
+    Public myLog As Log
+
     Friend WithEvents bgw_Download As New System.ComponentModel.BackgroundWorker()
     Public Delegate Sub DEL_addToLog(newMessage As String)
-    Public myOCRemix As OCRemix
+
 
 #Region "GUI events"
     Private Sub frm_Main_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -13,6 +16,7 @@
         cmb_Settings_DownloadFrom.SelectedItem = mySettings.DownloadFrom
         txt_Settings_DownloadTo.Text = mySettings.DownloadTo
         txt_Settings_CreateSubdirectories.Text = mySettings.CreateSubdirectories
+        num_Settings_MaxErrors.Value = mySettings.MaxErrors
     End Sub
 
     Private Sub frm_Main_Closed(sender As Object, e As EventArgs) Handles Me.Closed
@@ -68,6 +72,10 @@
         txt_Settings_CreateSubdirectories.Select()
     End Sub
 
+    Private Sub num_Settings_MaxErrors_ValueChanged(sender As Object, e As EventArgs) Handles num_Settings_MaxErrors.ValueChanged
+        mySettings.MaxErrors = num_Settings_MaxErrors.Value
+    End Sub
+
     Private Sub btn_Download_Click(sender As Object, e As EventArgs) Handles btn_Download.Click
         btn_Download.Enabled = False
         btn_Cancel.Enabled = True
@@ -88,42 +96,54 @@
 #Region "Background Worker"
     Private Sub bgw_Download_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles bgw_Download.DoWork
         Dim currentOCR As Integer = mySettings.LastSuccess + 1
+        Dim currentErrors As Integer = 0
 
         Do
-            If bgw_Download.CancellationPending = True Then
-                addToLog("INFO" & vbTab & "Operation canceled by user")
-                Exit Sub
-            End If
+            Try
+                If bgw_Download.CancellationPending = True Then
+                    addToLog("INFO" & vbTab & "Operation canceled by user")
+                    Exit Sub
+                End If
 
-            addToLog("INFO" & vbTab & "now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
+                If (currentErrors >= mySettings.MaxErrors) Then
+                    addToLog("ERROR" & vbTab & "max errors reached!")
+                    Exit Sub
+                End If
 
-            myOCRemix = New OCRemix(currentOCR)
-            addToLog("INFO" & vbTab & vbTab & "trying to get HTML page from " & myOCRemix.Url & "...")
+                addToLog("INFO" & vbTab & "now looking for OCR" & Strings.Right("00000" & currentOCR, 5) & "...")
 
-            If (myOCRemix.getHTMLSource() = 0) Then
-                addToLog("INFO" & vbTab & vbTab & "HTML page found!")
+                myOCRemix = New OCRemix(currentOCR)
+
+                addToLog("INFO" & vbTab & vbTab & "trying to get HTML page from " & myOCRemix.Url & "...")
+                myOCRemix.getHTMLSource()
+                addToLog("SUCC" & vbTab & vbTab & "HTML page found!")
+
+                addToLog("INFO" & vbTab & vbTab & "trying to get metadata from HTML page...")
                 myOCRemix.getMetadata(mySettings)
+                addToLog("SUCC" & vbTab & vbTab & "got metadata from HTML page!")
 
                 addToLog("INFO" & vbTab & vbTab & "trying to download file from " & myOCRemix.Mp3Url & "...")
-                If (myOCRemix.download(mySettings) = 0) Then
-                    addToLog("INFO" & vbTab & vbTab & "download successful!")
+                myOCRemix.download(mySettings)
+                addToLog("SUCC" & vbTab & vbTab & "download successful!")
 
-                    addToLog("INFO" & vbTab & vbTab & "trying to save the metadata...")
-                    If (myOCRemix.saveMetadata() = 0) Then
-                        addToLog("INFO" & vbTab & vbTab & "metadata saved successfully!")
-                    Else
-                        addToLog("ERROR" & vbTab & vbTab & "Error while saving metadata!")
-                    End If
-                Else
-                    addToLog("ERROR" & vbTab & vbTab & "Error while downloading")
-                End If
-            Else
-                addToLog("WARN" & vbTab & vbTab & "no HTML page found, skipping...")
-            End If
+                addToLog("INFO" & vbTab & vbTab & "trying to save the metadata...")
+                myOCRemix.saveMetadata()
+                addToLog("SUCC" & vbTab & vbTab & "metadata saved successfully!")
+            Catch ex As GetHTMLException
+                currentErrors += 1
 
-            System.Threading.Thread.Sleep(1000)
+                addToLog("WARN" & vbTab & vbTab & ex.Message & "(" & currentErrors & " / " & mySettings.MaxErrors & ")")
+            Catch ex As GetMetadataException
+                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+            Catch ex As DownloadException
+                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+            Catch ex As SaveMetadataException
+                addToLog("ERROR" & vbTab & vbTab & ex.Message)
+            Finally
+                System.Threading.Thread.Sleep(1000)
 
-            currentOCR += 1
+                currentOCR += 1
+            End Try
         Loop
     End Sub
 

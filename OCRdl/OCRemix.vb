@@ -180,8 +180,7 @@ Public Class OCRemix
         Me.Number = INnumber
     End Sub
 
-    ' ToDo make this raise an error
-    Public Function getHTMLSource() As Integer
+    Public Function getHTMLSource()
         Dim wc As Net.WebClient = New Net.WebClient()
         Dim retval As String = ""
 
@@ -232,86 +231,85 @@ Public Class OCRemix
 
         End Try
 
-        Return -1
+        Throw New GetHTMLException("no HTML page found")
 
 finish:
         retval = System.Text.RegularExpressions.Regex.Replace(retval, "\r\n|\r|\n", "")
         _HTMLSource = retval
-
-        Return 0
     End Function
 
-    ' ToDo make this raise an error
     Public Sub getMetadata(INmySettings As Settings)
         Dim mc As MatchCollection
         Dim temp As String
 
-        ' metadata = Regex.Match(_HTMLSource, "", RegexOptions.IgnoreCase).Groups(1).Value
+        Try
 
-        ' _mp3url
-        _mp3Url = Regex.Match(_HTMLSource, "<dt class=""col-sm-3 text-right"">Name:<\/dt>\s?<dd class=""col-sm-9""><span class=""single-line-item"">(?'mp3'.*?\.mp3)<\/span><\/dd>\s?<dt class=""col-sm-3 text-right"">Size:<\/dt>", RegexOptions.IgnoreCase).Groups("mp3").Value
-        _mp3Name = _mp3Url
-        If _mp3Url <> "" Then
-            _mp3Url = INmySettings.DownloadFrom & "/" & _mp3Url
-        End If
+            ' _mp3url
+            _mp3Url = Regex.Match(_HTMLSource, "<dt class=""col-sm-3 text-right"">Name:<\/dt>\s?<dd class=""col-sm-9""><span class=""single-line-item"">(?'mp3'.*?\.mp3)<\/span><\/dd>\s?<dt class=""col-sm-3 text-right"">Size:<\/dt>", RegexOptions.IgnoreCase).Groups("mp3").Value
+            _mp3Name = _mp3Url
+            If _mp3Url <> "" Then
+                _mp3Url = INmySettings.DownloadFrom & "/" & _mp3Url
+            End If
 
-        ' _GameName
-        _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
+            ' _GameName
+            _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
 
-        ' _RemixName
-        _RemixName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">.*?<\/a> ""(?'remixname'.*?)"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("remixname").Value
+            ' _RemixName
+            _RemixName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">.*?<\/a> ""(?'remixname'.*?)"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("remixname").Value
 
-        ' _RemixRemixer
-        temp = Regex.Match(_HTMLSource, "<h2>By <a href=""\/artist\/.*?"">.*?<\/a>\s*?<\/h2>", RegexOptions.IgnoreCase).Value
-        mc = Regex.Matches(temp, "<a href=""\/artist\/.*?"">(?'artist'.*?)<\/a>")
-        For Each match As Match In mc
-            temp = Regex.Match(match.Value, "<a href=""\/artist\/.*?"">(?'artist'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("artist").Value
-            _RemixRemixer.Add(temp)
-        Next
+            ' _RemixRemixer
+            temp = Regex.Match(_HTMLSource, "<h2>By <a href=""\/artist\/.*?"">.*?<\/a>\s*?<\/h2>", RegexOptions.IgnoreCase).Value
+            mc = Regex.Matches(temp, "<a href=""\/artist\/.*?"">(?'artist'.*?)<\/a>")
+            For Each match As Match In mc
+                temp = Regex.Match(match.Value, "<a href=""\/artist\/.*?"">(?'artist'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("artist").Value
+                _RemixRemixer.Add(temp)
+            Next
 
-        ' _RemixPosted
-        _RemixPosted = Regex.Match(_HTMLSource, "<p class=""color-secondary"">Posted (?'posted'\d{4}-\d{2}-\d{2}), (<a href=""\/community\/topic\/\d{3,6}\/"" title=""views judges' decision"">)?evaluated", RegexOptions.IgnoreCase).Groups("posted").Value
+            ' _RemixPosted
+            _RemixPosted = Regex.Match(_HTMLSource, "<p class=""color-secondary"">Posted (?'posted'\d{4}-\d{2}-\d{2}), (<a href=""\/community\/topic\/\d{3,6}\/"" title=""views judges' decision"">)?evaluated", RegexOptions.IgnoreCase).Groups("posted").Value
 
-        ' _GameSong
-        temp = Regex.Match(_HTMLSource, "<h2>Arranging the music of (\d{1,3}|one) songs?\.\.\.<\/h2>\s*?<h3>.*?<\/h3>", RegexOptions.IgnoreCase).Value
-        mc = Regex.Matches(temp, "<a href=""\/song\/.*?"">(?'song'.*?)<\/a>")
-        For Each match As Match In mc
-            temp = Regex.Match(match.Value, "<a href=""\/song\/.*?"">(?'song'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("song").Value
-            _GameSong.Add(temp)
-        Next
+            ' _GameSong
+            temp = Regex.Match(_HTMLSource, "<h2>Arranging the music of (\d{1,3}|one) songs?\.\.\.<\/h2>\s*?<h3>.*?<\/h3>", RegexOptions.IgnoreCase).Value
+            mc = Regex.Matches(temp, "<a href=""\/song\/.*?"">(?'song'.*?)<\/a>")
+            For Each match As Match In mc
+                temp = Regex.Match(match.Value, "<a href=""\/song\/.*?"">(?'song'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("song").Value
+                _GameSong.Add(temp)
+            Next
 
-        ' _GameOrganisation
-        _GameOrganisation = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, \d{4}", RegexOptions.IgnoreCase).Groups("gameorg").Value
+            ' _GameOrganisation
+            _GameOrganisation = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, \d{4}", RegexOptions.IgnoreCase).Groups("gameorg").Value
 
-        ' _GameYear
-        _GameYear = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system", RegexOptions.IgnoreCase).Groups("gameyear").Value
+            ' _GameYear
+            _GameYear = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system", RegexOptions.IgnoreCase).Groups("gameyear").Value
 
-        ' _GameSystem
-        _GameSystem = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by", RegexOptions.IgnoreCase).Groups("gamesystem").Value
+            ' _GameSystem
+            _GameSystem = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by", RegexOptions.IgnoreCase).Groups("gamesystem").Value
 
-        ' _GameComposer
-        temp = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by (?'composer'<a href=""\/artist\/.*?<\/a>)\s*?<\/div>", RegexOptions.IgnoreCase).Groups("composer").Value
-        mc = Regex.Matches(temp, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>")
-        For Each match As Match In mc
-            temp = Regex.Match(match.Value, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("composer").Value
-            _GameComposer.Add(temp)
-        Next
+            ' _GameComposer
+            temp = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by (?'composer'<a href=""\/artist\/.*?<\/a>)\s*?<\/div>", RegexOptions.IgnoreCase).Groups("composer").Value
+            mc = Regex.Matches(temp, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>")
+            For Each match As Match In mc
+                temp = Regex.Match(match.Value, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("composer").Value
+                _GameComposer.Add(temp)
+            Next
 
-        ' _TagsGenre
-        temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("genre").Value
-        If temp <> "" Then _TagsGenre = temp.Replace(", ", ",").Split(",").ToList
+            ' _TagsGenre
+            temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("genre").Value
+            If temp <> "" Then _TagsGenre = temp.Replace(", ", ",").Split(",").ToList
 
-        ' _TagsMood
-        temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("mood").Value
-        If temp <> "" Then _TagsMood = temp.Replace(", ", ",").Split(",").ToList
+            ' _TagsMood
+            temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("mood").Value
+            If temp <> "" Then _TagsMood = temp.Replace(", ", ",").Split(",").ToList
 
-        ' _TagsInstrumentation
-        temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("instrument").Value
-        If temp <> "" Then _TagsInstrumentation = temp.Replace(", ", ",").Split(",").ToList
+            ' _TagsInstrumentation
+            temp = Regex.Match(_HTMLSource, "<h2>Tags(.|\s)*?Genre:<\/dt>\s*?<.*?>(?'genre'.*?)<\/dd>(.|\s)*?Mood:<\/dt>(.|\s)*?>(?'mood'.*?)<\/dd>(.|\s)*?Instrumentation:<\/dt>(.|\s)*?>(?'instrument'.*?)<\/dd>", RegexOptions.IgnoreCase).Groups("instrument").Value
+            If temp <> "" Then _TagsInstrumentation = temp.Replace(", ", ",").Split(",").ToList
+        Catch
+            Throw New GetMetadataException("Error while extracting metadata")
+        End Try
     End Sub
 
-    ' ToDo make this raise an error
-    Public Function download(mySettings As Settings) As Integer
+    Public Function download(mySettings As Settings)
         Dim wc As Net.WebClient = New Net.WebClient()
         wc.Encoding = System.Text.Encoding.UTF8
 
@@ -341,6 +339,11 @@ finish:
             toFile = toFile.Replace("%tags_instrument%", Me.TagsInstrumentation)
             toFile = toFile.Replace("%tags_mood%", Me.TagsMood)
         End If
+
+        ' tidy up toFile
+        toFile = toFile.Replace(":", "_")
+        toFile = toFile.Replace("\", "_")
+
         _mp3LocalFile = toFile
 
         ' create path to download file to
@@ -395,13 +398,11 @@ finish:
 
         End Try
 
-        Return -1
+        Throw New DownloadException("file could not be downloaded")
 finish:
-        Return 0
     End Function
 
-    ' ToDo make this raise an error
-    Public Function saveMetadata() As Integer
+    Public Function saveMetadata()
         Try
             Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
             Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
@@ -466,9 +467,35 @@ finish:
             mp3.Save()
             mp3.Dispose()
         Catch
-            Return -1
+            Throw New SaveMetadataException("error while saving metadata")
         End Try
-
-        Return 0
     End Function
+End Class
+
+Public Class GetHTMLException
+    Inherits Exception
+
+    Public Sub New(message As String)
+    End Sub
+End Class
+
+Public Class GetMetadataException
+    Inherits Exception
+
+    Public Sub New(message As String)
+    End Sub
+End Class
+
+Public Class DownloadException
+    Inherits Exception
+
+    Public Sub New(message As String)
+    End Sub
+End Class
+
+Public Class SaveMetadataException
+    Inherits Exception
+
+    Public Sub New(message As String)
+    End Sub
 End Class

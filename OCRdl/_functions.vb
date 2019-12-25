@@ -6,6 +6,4 @@
 
         frm_Main.txt_Log.AppendText(timestamp & vbTab & newMessage & vbCrLf)
     End Sub
-
-
 End Module

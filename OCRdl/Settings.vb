@@ -3,6 +3,7 @@
     Private _lastSuccess As Integer
     Private _downloadFrom As String
     Private _createSubdirectories As String
+    Private _maxErrors As Integer
 
     Public Property DownloadTo As String
         Get
@@ -36,6 +37,14 @@
             _createSubdirectories = value
         End Set
     End Property
+    Public Property MaxErrors As Integer
+        Get
+            Return _maxErrors
+        End Get
+        Set(value As Integer)
+            _maxErrors = value
+        End Set
+    End Property
 
     Public Sub New()
     End Sub
@@ -63,5 +72,6 @@
         Me.LastSuccess = ISettings.LastSuccess
         Me.DownloadFrom = ISettings.DownloadFrom
         Me.CreateSubdirectories = ISettings.CreateSubdirectories
+        Me.MaxErrors = ISettings.MaxErrors
     End Sub
 End Class

@@ -53,14 +53,19 @@ Partial Class frm_Main
         Me.mnu_Tags_Genre = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_TagsInstrument = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_TagsMood = New System.Windows.Forms.ToolStripMenuItem()
+        Me.lbl_Settings_MaxErrors = New System.Windows.Forms.Label()
+        Me.num_Settings_MaxErrors = New System.Windows.Forms.NumericUpDown()
         Me.grp_Settings.SuspendLayout()
         Me.ctx_Settings_CreateSubdirectories.SuspendLayout()
+        CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'grp_Settings
         '
         Me.grp_Settings.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.grp_Settings.Controls.Add(Me.num_Settings_MaxErrors)
+        Me.grp_Settings.Controls.Add(Me.lbl_Settings_MaxErrors)
         Me.grp_Settings.Controls.Add(Me.btn_Settings_CreateSubdirectories)
         Me.grp_Settings.Controls.Add(Me.txt_Settings_CreateSubdirectories)
         Me.grp_Settings.Controls.Add(Me.lbl_Settings_CreateSubdirectories)
@@ -71,7 +76,7 @@ Partial Class frm_Main
         Me.grp_Settings.Controls.Add(Me.txt_Settings_DownloadTo)
         Me.grp_Settings.Location = New System.Drawing.Point(12, 12)
         Me.grp_Settings.Name = "grp_Settings"
-        Me.grp_Settings.Size = New System.Drawing.Size(798, 95)
+        Me.grp_Settings.Size = New System.Drawing.Size(798, 178)
         Me.grp_Settings.TabIndex = 0
         Me.grp_Settings.TabStop = False
         Me.grp_Settings.Text = "Settings"
@@ -302,6 +307,22 @@ Partial Class frm_Main
         Me.mnu_TagsMood.Size = New System.Drawing.Size(195, 22)
         Me.mnu_TagsMood.Text = "%tags_mood%"
         '
+        'lbl_Settings_MaxErrors
+        '
+        Me.lbl_Settings_MaxErrors.AutoSize = True
+        Me.lbl_Settings_MaxErrors.Location = New System.Drawing.Point(6, 93)
+        Me.lbl_Settings_MaxErrors.Name = "lbl_Settings_MaxErrors"
+        Me.lbl_Settings_MaxErrors.Size = New System.Drawing.Size(120, 13)
+        Me.lbl_Settings_MaxErrors.TabIndex = 8
+        Me.lbl_Settings_MaxErrors.Text = "Max consecutive errors:"
+        '
+        'num_Settings_MaxErrors
+        '
+        Me.num_Settings_MaxErrors.Location = New System.Drawing.Point(154, 91)
+        Me.num_Settings_MaxErrors.Name = "num_Settings_MaxErrors"
+        Me.num_Settings_MaxErrors.Size = New System.Drawing.Size(120, 20)
+        Me.num_Settings_MaxErrors.TabIndex = 9
+        '
         'frm_Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -316,6 +337,7 @@ Partial Class frm_Main
         Me.grp_Settings.ResumeLayout(False)
         Me.grp_Settings.PerformLayout()
         Me.ctx_Settings_CreateSubdirectories.ResumeLayout(False)
+        CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -351,4 +373,6 @@ Partial Class frm_Main
     Friend WithEvents mnu_Tags_Genre As ToolStripMenuItem
     Friend WithEvents mnu_TagsInstrument As ToolStripMenuItem
     Friend WithEvents mnu_TagsMood As ToolStripMenuItem
+    Friend WithEvents num_Settings_MaxErrors As NumericUpDown
+    Friend WithEvents lbl_Settings_MaxErrors As Label
 End Class
