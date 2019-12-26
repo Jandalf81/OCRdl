@@ -1,7 +1,7 @@
 ﻿Imports System.Text.RegularExpressions
 
 Public Class OCRemix
-    Private Const baseUrl As String = "https://ocremix.org/remix/"
+    Private Const baseUrl As String = "https://ocremix.org"
 
     Private _number As Integer                          'Constructor
     Private _id As String                               'SET Number
@@ -11,6 +11,8 @@ Public Class OCRemix
     Private _mp3Name As String                          'getMetadata()
     Private _mp3Url As String                           'getMetadata()
     Private _mp3LocalFile As String                     'download()
+
+    Private _GameUrl As String                          'getMetadata()
 
     Private _GameName As String                         'getMetadata()
     Private _RemixName As String                        'getMetadata()
@@ -32,7 +34,7 @@ Public Class OCRemix
         Set(value As Integer)
             _number = value
             _id = "OCR" & Strings.Right("00000" & _number, 5)
-            _url = baseUrl & _id
+            _url = baseUrl & "/remix/" & _id
         End Set
     End Property
     Public ReadOnly Property Id As String
@@ -180,62 +182,8 @@ Public Class OCRemix
         Me.Number = INnumber
     End Sub
 
-    Public Sub getHTMLSource()
-        Dim wc As Net.WebClient = New Net.WebClient()
-        Dim retval As String = ""
-
-        wc.Encoding = System.Text.Encoding.UTF8
-
-        ' test security protocols
-        Try
-            retval = wc.DownloadString(Url)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Ssl3
-            retval = wc.DownloadString(Url)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls
-            retval = wc.DownloadString(Url)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls11
-            retval = wc.DownloadString(Url)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls12
-            retval = wc.DownloadString(Url)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Throw New GetHTMLException("no HTML page found")
-
-finish:
-        retval = System.Text.RegularExpressions.Regex.Replace(retval, "\r\n|\r|\n", "")
-        _HTMLSource = retval
+    Public Sub getRemixHTML()
+        Me._HTMLSource = getHTMLSource(Me.Url)
     End Sub
 
     Public Sub getMetadata(INmySettings As Settings)
@@ -253,6 +201,9 @@ finish:
 
             ' _GameName
             _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
+
+            ' _GameUrl
+            _GameUrl = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""(?'gameurl'\/game\/.*?)"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("gameurl").Value
 
             ' _RemixName
             _RemixName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">.*?<\/a> ""(?'remixname'.*?)"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("remixname").Value
@@ -310,9 +261,6 @@ finish:
     End Sub
 
     Public Sub download(mySettings As Settings)
-        Dim wc As Net.WebClient = New Net.WebClient()
-        wc.Encoding = System.Text.Encoding.UTF8
-
         ' Build path to download the file to
         Dim toFile As String
 
@@ -355,53 +303,32 @@ finish:
             My.Computer.FileSystem.CreateDirectory(path)
         End If
 
-        ' test security protocols
-        Try
-            wc.DownloadFile(Me._mp3Url, toFile)
+        downLoadFile(Me._mp3Url, toFile)
+    End Sub
 
-            GoTo finish
-        Catch ex As Exception
+    Public Sub getCover()
+        Dim gameHTML As String = getHTMLSource(baseUrl & "/" & Me._GameUrl)
+        Dim coverURL As String
+        Dim coverExt As String
 
-        End Try
+        ' <div class="col-sm-4 col-md-4 col-lg-4"><div style="text-align:center;"><img src="(?'coverUrl'\/img-size\/.*?jpg)" alt=
+        coverURL = Regex.Match(gameHTML, "<div class=""col-sm-4 col-md-4 col-lg-4""><div style=""text-align:center;""><img src=""(?'coverUrl'\/img-size\/.*?)"" alt=", RegexOptions.IgnoreCase).Groups("coverUrl").Value
 
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Ssl3
-            wc.DownloadFile(Me._mp3Url, toFile)
+        coverExt = IO.Path.GetExtension(coverURL)
 
-            GoTo finish
-        Catch ex As Exception
+        downLoadFile(baseUrl & "/" & coverURL, My.Computer.FileSystem.GetParentPath(Me._mp3LocalFile) & "\folder" & coverExt)
 
-        End Try
+        ' convert the image if necessary
+        If (coverExt <> ".jpg") Then
+            Dim image As Image
 
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls
-            wc.DownloadFile(Me._mp3Url, toFile)
+            image = Image.FromFile(My.Computer.FileSystem.GetParentPath(Me._mp3LocalFile) & "\folder" & coverExt)
+            image.Save(My.Computer.FileSystem.GetParentPath(Me._mp3LocalFile) & "\folder.jpg", Imaging.ImageFormat.Jpeg)
 
-            GoTo finish
-        Catch ex As Exception
+            image.Dispose()
 
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls11
-            wc.DownloadFile(Me._mp3Url, toFile)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Try
-            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls12
-            wc.DownloadFile(Me._mp3Url, toFile)
-
-            GoTo finish
-        Catch ex As Exception
-
-        End Try
-
-        Throw New DownloadException("file could not be downloaded")
-finish:
+            My.Computer.FileSystem.DeleteFile(My.Computer.FileSystem.GetParentPath(Me._mp3LocalFile) & "\folder" & coverExt)
+        End If
     End Sub
 
     Public Sub saveMetadata()
@@ -417,6 +344,8 @@ finish:
 
             ' re-open file to re-create tags
             mp3 = TagLib.File.Create(Me._mp3LocalFile)
+            TagLib.Id3v2.Tag.DefaultVersion = 4 ' needed to correctly split ARTIST
+            TagLib.Id3v2.Tag.ForceDefaultVersion = True
             tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
 
             tag.Performers = Me._RemixRemixer.ToArray
@@ -452,7 +381,7 @@ finish:
             tag.AddFrame(custom)
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("SOURCE", TagLib.StringType.UTF16)
-            custom.Text = {"https://ocremix.org/"}
+            custom.Text = {baseUrl & "/"}
             tag.AddFrame(custom)
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("MOOD", TagLib.StringType.UTF16)
@@ -472,12 +401,125 @@ finish:
             Throw New SaveMetadataException("error while saving metadata")
         End Try
     End Sub
+
+    Private Function getHTMLSource(url As String) As String
+        Dim wc As Net.WebClient = New Net.WebClient()
+        Dim retval As String = ""
+
+        wc.Encoding = System.Text.Encoding.UTF8
+
+        ' test security protocols
+        Try
+            retval = wc.DownloadString(url)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Ssl3
+            retval = wc.DownloadString(url)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls
+            retval = wc.DownloadString(url)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls11
+            retval = wc.DownloadString(url)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls12
+            retval = wc.DownloadString(url)
+
+            GoTo finish
+        Catch ex As Exception
+
+        End Try
+
+        Throw New GetHTMLException("no HTML page found")
+
+finish:
+        retval = System.Text.RegularExpressions.Regex.Replace(retval, "\r\n|\r|\n", "")
+        _HTMLSource = retval
+
+        Return retval
+    End Function
+
+    Private Sub downLoadFile(url As String, toFile As String)
+        Dim wc As Net.WebClient = New Net.WebClient()
+        wc.Encoding = System.Text.Encoding.UTF8
+
+        ' test security protocols
+        Try
+            wc.DownloadFile(url, toFile)
+
+            Exit Sub
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Ssl3
+            wc.DownloadFile(url, toFile)
+
+            Exit Sub
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls
+            wc.DownloadFile(url, toFile)
+
+            Exit Sub
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls11
+            wc.DownloadFile(url, toFile)
+
+            Exit Sub
+        Catch ex As Exception
+
+        End Try
+
+        Try
+            Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls12
+            wc.DownloadFile(url, toFile)
+
+            Exit Sub
+        Catch ex As Exception
+
+        End Try
+
+        Throw New DownloadException("file could not be downloaded")
+    End Sub
 End Class
 
 Public Class GetHTMLException
     Inherits Exception
 
     Public Sub New(message As String)
+        MyBase.New(message)
     End Sub
 End Class
 
@@ -485,6 +527,7 @@ Public Class GetMetadataException
     Inherits Exception
 
     Public Sub New(message As String)
+        MyBase.New(message)
     End Sub
 End Class
 
@@ -492,6 +535,7 @@ Public Class DownloadException
     Inherits Exception
 
     Public Sub New(message As String)
+        MyBase.New(message)
     End Sub
 End Class
 
@@ -499,5 +543,6 @@ Public Class SaveMetadataException
     Inherits Exception
 
     Public Sub New(message As String)
+        MyBase.New(message)
     End Sub
 End Class

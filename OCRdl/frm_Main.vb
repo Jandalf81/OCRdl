@@ -37,6 +37,8 @@ Public Class frm_Main
         myLog.printDEBUG = mySettings.printDEBUG
 
         myLog.add(MessageLevel.INFO, "OCRdl started, last success was " & mySettings.LastSuccess)
+        status_lbl_Errors.Text = "Consecutive Errors: 0 / " & mySettings.MaxErrors
+        status_prg_Errors.Maximum = mySettings.MaxErrors
     End Sub
 
     Private Sub frm_Main_Closed(sender As Object, e As EventArgs) Handles Me.Closed
@@ -161,7 +163,7 @@ Public Class frm_Main
                 myOCRemix = New OCRemix(currentOCR)
 
                 myLog.add(MessageLevel.INFO, "trying to get HTML page from " & myOCRemix.Url & "...", 1)
-                myOCRemix.getHTMLSource()
+                myOCRemix.getRemixHTML()
                 myLog.add(MessageLevel.SUCC, "HTML page found!", 2)
 
                 myLog.add(MessageLevel.INFO, "trying to get metadata from HTML page...", 1)
@@ -172,13 +174,24 @@ Public Class frm_Main
                 myOCRemix.download(mySettings)
                 myLog.add(MessageLevel.SUCC, "download successful!", 2)
 
+                If (My.Computer.FileSystem.FileExists(My.Computer.FileSystem.GetParentPath(myOCRemix.Mp3LocalFile) & "\folder.jpg") = True) Then
+                    myLog.add(MessageLevel.INFO, "cover already exists", 1)
+                Else
+                    myLog.add(MessageLevel.INFO, "trying to download cover...", 1)
+                    myOCRemix.getCover()
+                    myLog.add(MessageLevel.SUCC, "download successful!", 2)
+                End If
+
                 myLog.add(MessageLevel.INFO, "trying to save the metadata...", 1)
                 myOCRemix.saveMetadata()
                 myLog.add(MessageLevel.SUCC, "metadata saved successfully!", 2)
+
+                currentErrors = 0
+                mySettings.LastSuccess = CInt(myOCRemix.Id.Replace("OCR", ""))
             Catch ex As GetHTMLException
                 currentErrors += 1
 
-                myLog.add(MessageLevel.WARN, ex.Message & "(" & currentErrors & " / " & mySettings.MaxErrors & ")", 2)
+                myLog.add(MessageLevel.WARN, ex.Message & " (" & currentErrors & " / " & mySettings.MaxErrors & ")", 2)
             Catch ex As GetMetadataException
                 myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Catch ex As DownloadException
@@ -186,7 +199,9 @@ Public Class frm_Main
             Catch ex As SaveMetadataException
                 myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Finally
-                System.Threading.Thread.Sleep(1000)
+                'System.Threading.Thread.Sleep(1000)
+
+                bgw_Download.ReportProgress(currentErrors)
 
                 currentOCR += 1
             End Try
@@ -195,6 +210,8 @@ Public Class frm_Main
 
     Private Sub bgw_Download_ProgressChanged(sender As Object, e As System.ComponentModel.ProgressChangedEventArgs) Handles bgw_Download.ProgressChanged
         'addToLog("Progress: " & e.ProgressPercentage)
+        status_lbl_Errors.Text = "Consecutive Errors: " & e.ProgressPercentage & " / " & mySettings.MaxErrors
+        status_prg_Errors.Value = e.ProgressPercentage
     End Sub
 
     Private Sub bgw_Download_Completed(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles bgw_Download.RunWorkerCompleted
