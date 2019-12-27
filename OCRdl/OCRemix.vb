@@ -22,6 +22,7 @@ Public Class OCRemix
     Private _GameOrganisation As String                 'getMetadata()
     Private _GameYear As Integer                        'getMetadata()
     Private _GameSystem As String                       'getMetadata()
+    Private _GameSystemLong As String                   'getMetadata()
     Private _GameComposer As New List(Of String)        'getMetadata()
     Private _TagsGenre As New List(Of String)           'getMetadata()
     Private _TagsMood As New List(Of String)            'getMetadata()
@@ -125,6 +126,11 @@ Public Class OCRemix
             Return _GameSystem
         End Get
     End Property
+    Public ReadOnly Property GameSystemLong As String
+        Get
+            Return _GameSystemLong
+        End Get
+    End Property
     Public ReadOnly Property GameComposer As String
         Get
             Dim retval As String = ""
@@ -194,6 +200,8 @@ Public Class OCRemix
 
             ' _mp3url
             _mp3Url = Regex.Match(_HTMLSource, "<dt class=""col-sm-3 text-right"">Name:<\/dt>\s?<dd class=""col-sm-9""><span class=""single-line-item"">(?'mp3'.*?\.mp3)<\/span><\/dd>\s?<dt class=""col-sm-3 text-right"">Size:<\/dt>", RegexOptions.IgnoreCase).Groups("mp3").Value
+            _mp3Url = urlDecode(_mp3Url)
+
             _mp3Name = _mp3Url
             If _mp3Url <> "" Then
                 _mp3Url = INmySettings.DownloadFrom & "/" & _mp3Url
@@ -201,6 +209,7 @@ Public Class OCRemix
 
             ' _GameName
             _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
+            _GameName = urlDecode(_GameName)
 
             ' _GameUrl
             _GameUrl = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""(?'gameurl'\/game\/.*?)"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("gameurl").Value
@@ -235,6 +244,7 @@ Public Class OCRemix
 
             ' _GameSystem
             _GameSystem = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by", RegexOptions.IgnoreCase).Groups("gamesystem").Value
+            Me.getSystemNameLong()
 
             ' _GameComposer
             temp = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by (?'composer'<a href=""\/artist\/.*?<\/a>)\s*?<\/div>", RegexOptions.IgnoreCase).Groups("composer").Value
@@ -276,6 +286,7 @@ Public Class OCRemix
             toFile = toFile.Replace("%game_organisation%", Me.GameOrganisation)
             toFile = toFile.Replace("%game_song%", Me.GameSong)
             toFile = toFile.Replace("%game_system%", Me.GameSystem)
+            toFile = toFile.Replace("%game_system_long%", Me.GameSystemLong)
             toFile = toFile.Replace("%game_year%", Me.GameYear)
 
             toFile = toFile.Replace("%remix_id%", Me.Id)
@@ -290,6 +301,7 @@ Public Class OCRemix
             ' tidy up toFile
             toFile = toFile.Replace(":", "_")
             toFile = toFile.Replace("/", "_")
+            toFile = toFile.Replace("*", "_")
 
             toFile = mySettings.DownloadTo & "\" & toFile
         End If
@@ -331,7 +343,7 @@ Public Class OCRemix
         End If
     End Sub
 
-    Public Sub saveMetadata()
+    Public Sub saveMetadata(mySettings As Settings)
         Try
             Dim mp3 As TagLib.File = TagLib.File.Create(Me._mp3LocalFile)
             Dim tag As TagLib.Id3v2.Tag = CType(mp3.GetTag(TagLib.TagTypes.Id3v2), TagLib.Id3v2.Tag)
@@ -354,7 +366,6 @@ Public Class OCRemix
             tag.Year = Me._GameYear
             tag.Genres = Me._TagsGenre.ToArray
             tag.Composers = {"Video Game Remixes"}
-            tag.AlbumArtists = {Me._GameSystem}
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_NAME", TagLib.StringType.UTF16)
             custom.Text = {Me._GameName}
@@ -364,12 +375,26 @@ Public Class OCRemix
             custom.Text = Me._GameSong.ToArray
             tag.AddFrame(custom)
 
-            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_SYSTEM", TagLib.StringType.UTF16)
-            custom.Text = {Me._GameSystem}
-            tag.AddFrame(custom)
+            If (mySettings.useLongSystemNameInTag = True) Then
+                tag.AlbumArtists = {Me._GameSystemLong}
+
+                custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_SYSTEM", TagLib.StringType.UTF16)
+                custom.Text = {Me._GameSystemLong}
+                tag.AddFrame(custom)
+            Else
+                tag.AlbumArtists = {Me._GameSystem}
+
+                custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_SYSTEM", TagLib.StringType.UTF16)
+                custom.Text = {Me._GameSystem}
+                tag.AddFrame(custom)
+            End If
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_ORGANISATION", TagLib.StringType.UTF16)
             custom.Text = {Me._GameOrganisation}
+            tag.AddFrame(custom)
+
+            custom = New TagLib.Id3v2.UserTextInformationFrame("GAME_COMPOSER", TagLib.StringType.UTF16)
+            custom.Text = Me._GameComposer.ToArray
             tag.AddFrame(custom)
 
             custom = New TagLib.Id3v2.UserTextInformationFrame("ID", TagLib.StringType.UTF16)
@@ -401,6 +426,175 @@ Public Class OCRemix
             Throw New SaveMetadataException("error while saving metadata")
         End Try
     End Sub
+
+    Private Sub getSystemNameLong()
+        Dim game_system_long As String = ""
+
+        Select Case Me.GameSystem.ToLower
+            Case "3do"
+                game_system_long = "Panasonic 3do"
+            Case "elctr"
+                game_system_long = "Acorn Electron"
+            Case "amiga"
+                game_system_long = "Commodore Amiga"
+            Case "cd32"
+                game_system_long = "Commodore Amiga 32"
+            Case "cpc"
+                game_system_long = "Amstrad CPC"
+            Case "andrd"
+                game_system_long = "Google Android"
+            Case "aplii"
+                game_system_long = "Apple AppleII"
+            Case "arc"
+                game_system_long = "Arcade"
+            Case "a2600"
+                game_system_long = "Atari 2600"
+            Case "axlxe"
+                game_system_long = "Atari 400"
+            Case "a5200"
+                game_system_long = "Atari 5200"
+            Case "a7800"
+                game_system_long = "Atari 7800"
+            Case "jag"
+                game_system_long = "Atari Jaguar"
+            Case "lynx"
+                game_system_long = "Atari Lynx"
+            Case "st"
+                game_system_long = "Atari ST"
+            Case "bbcm"
+                game_system_long = "Acorn BBC Micro"
+            Case "col"
+                game_system_long = "Mattel Colecovision"
+            Case "c64"
+                game_system_long = "Commodore 64"
+            Case "dos"
+                game_system_long = "Microsoft DOS"
+            Case "dc"
+                game_system_long = "Sega Dreamcast"
+            Case "fm7"
+                game_system_long = "Fujitsu FM-7"
+            Case "fmtwn"
+                game_system_long = "Fujitsu FM-Towns"
+            Case "gb"
+                game_system_long = "Nintendo Game Boy"
+            Case "gba"
+                game_system_long = "Nintendo Game Boy Advance"
+            Case "gbc"
+                game_system_long = "Nintendo Game Boy Color"
+            Case "gcn"
+                game_system_long = "Nintendo GameCube"
+            Case "intvn"
+                game_system_long = "Mattel Intellivision"
+            Case "ios"
+                game_system_long = "Apple iOS"
+            Case "linux"
+                game_system_long = "Linux"
+            Case "mac"
+                game_system_long = "Apple Macintosh"
+            Case "msx"
+                game_system_long = "MSX Association MSX"
+            Case "ngage"
+                game_system_long = "Nokia N-Gage"
+            Case "pc60"
+                game_system_long = "NEC PC-6001"
+            Case "pc88"
+                game_system_long = "NEC PC-8801"
+            Case "pc98"
+                game_system_long = "NEC PC-9801"
+            Case "ng"
+                game_system_long = "SNK Neo Geo"
+            Case "ngcd"
+                game_system_long = "SNK Neo Geo CD"
+            Case "ngp"
+                game_system_long = "SNK Neo Geo Pocket"
+            Case "ngpc"
+                game_system_long = "SNK Neo Geo Pocket Color"
+            Case "nes"
+                game_system_long = "Nintendo NES"
+            Case "3ds"
+                game_system_long = "Nintendo 3DS"
+            Case "n64"
+                game_system_long = "Nintendo N64"
+            Case "nds"
+                game_system_long = "Nintendo DS"
+            Case "swtch"
+                game_system_long = "Nintendo Switch"
+            Case "pcfx"
+                game_system_long = "NEC PC-FX"
+            Case "cdi"
+                game_system_long = "Philips CD-i"
+            Case "ps1"
+                game_system_long = "Sony PlayStation"
+            Case "ps2"
+                game_system_long = "Sony PlayStation 2"
+            Case "ps3"
+                game_system_long = "Sony PlayStation 3"
+            Case "ps4"
+                game_system_long = "Sony PlayStation 4"
+            Case "psp"
+                game_system_long = "Sony PlayStation Portable"
+            Case "vita"
+                game_system_long = "Sony PlayStation Vita"
+            Case "32x"
+                game_system_long = "Sega 32X"
+            Case "scd"
+                game_system_long = "Sega CD"
+            Case "gg"
+                game_system_long = "Sega Game Gear"
+            Case "gen"
+                game_system_long = "Sega Genesis"
+            Case "sms"
+                game_system_long = "Sega Master System"
+            Case "pico"
+                game_system_long = "Sega Pico"
+            Case "sat"
+                game_system_long = "Sega Saturn"
+            Case "sg1k"
+                game_system_long = "Sega SG-1000"
+            Case "snes"
+                game_system_long = "Nintendo SuperNES"
+            Case "sgfx"
+                game_system_long = "NEC SuperGrafx"
+            Case "tg16"
+                game_system_long = "NEC TurboGrafx-16"
+            Case "tgcd"
+                game_system_long = "NEC TurboGrafx-CD"
+            Case "vec"
+                game_system_long = "Vectrex"
+            Case "vb"
+                game_system_long = "Nintendo Virtual Boy"
+            Case "wii"
+                game_system_long = "Nintendo Wii"
+            Case "wiiu"
+                game_system_long = "Nintendo Wii U"
+            Case "win"
+                game_system_long = "Microsoft Windows"
+            Case "ws"
+                game_system_long = "Bandai WonderSwan"
+            Case "wsc"
+                game_system_long = "Bandai WonderSwan Color"
+            Case "x1"
+                game_system_long = "Sharp X1"
+            Case "x68k"
+                game_system_long = "Sharp X68000"
+            Case "xbox"
+                game_system_long = "Microsoft Xbox"
+            Case "xb360"
+                game_system_long = "Microsoft Xbox 360"
+            Case "xbone"
+                game_system_long = "Microsoft Xbox One"
+            Case "spec"
+                game_system_long = "Amstrad ZX Spectrum"
+        End Select
+
+        Me._GameSystemLong = game_system_long
+    End Sub
+
+    Private Function urlDecode(url As String) As String
+        url = url.Replace("&amp;", "&")
+
+        Return url
+    End Function
 
     Private Function getHTMLSource(url As String) As String
         Dim wc As Net.WebClient = New Net.WebClient()

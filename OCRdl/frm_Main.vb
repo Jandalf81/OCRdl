@@ -81,6 +81,7 @@ Public Class frm_Main
             mnu_GameOrganisation.Click,
             mnu_GameSong.Click,
             mnu_GameSystem.Click,
+            mnu_GameSystemLong.Click,
             mnu_GameYear.Click,
             mnu_RemixId.Click,
             mnu_RemixName.Click,
@@ -99,7 +100,12 @@ Public Class frm_Main
         mySettings.MaxErrors = num_Settings_MaxErrors.Value
     End Sub
 
+    Private Sub chk_Settings_UseLongSystemInTag_CheckedChanged(sender As Object, e As EventArgs) Handles chk_Settings_UseLongSystemInTag.CheckedChanged
+        mySettings.useLongSystemNameInTag = chk_Settings_UseLongSystemInTag.Checked
+    End Sub
+
     Private Sub btn_Download_Click(sender As Object, e As EventArgs) Handles btn_Download.Click
+        grp_Settings.Enabled = False
         btn_Download.Enabled = False
         btn_Cancel.Enabled = True
 
@@ -183,11 +189,11 @@ Public Class frm_Main
                 End If
 
                 myLog.add(MessageLevel.INFO, "trying to save the metadata...", 1)
-                myOCRemix.saveMetadata()
+                myOCRemix.saveMetadata(mySettings)
                 myLog.add(MessageLevel.SUCC, "metadata saved successfully!", 2)
 
                 currentErrors = 0
-                mySettings.LastSuccess = CInt(myOCRemix.Id.Replace("OCR", ""))
+                mySettings.LastSuccess = currentOCR
             Catch ex As GetHTMLException
                 currentErrors += 1
 
@@ -215,6 +221,7 @@ Public Class frm_Main
     End Sub
 
     Private Sub bgw_Download_Completed(sender As Object, e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles bgw_Download.RunWorkerCompleted
+        grp_Settings.Enabled = True
         btn_Download.Enabled = True
         btn_Cancel.Enabled = False
     End Sub

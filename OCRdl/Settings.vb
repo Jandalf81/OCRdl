@@ -5,6 +5,8 @@
     Private _createSubdirectories As String
     Private _maxErrors As Integer
 
+    Public Property useLongSystemNameInTag As Boolean
+
     Public Property printDEBUG As Boolean
     Public Property printSUCC As Boolean
     Public Property printINFO As Boolean
@@ -79,6 +81,8 @@
         Me.DownloadFrom = ISettings.DownloadFrom
         Me.CreateSubdirectories = ISettings.CreateSubdirectories
         Me.MaxErrors = ISettings.MaxErrors
+
+        Me.useLongSystemNameInTag = ISettings.useLongSystemNameInTag
 
         Me.printDEBUG = ISettings.printDEBUG
         Me.printSUCC = ISettings.printSUCC

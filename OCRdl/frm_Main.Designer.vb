@@ -43,6 +43,7 @@ Partial Class frm_Main
         Me.mnu_GameName = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_GameSong = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_GameSystem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnu_GameSystemLong = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_GameOrganisation = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnu_GameYear = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
@@ -62,8 +63,9 @@ Partial Class frm_Main
         Me.chk_Log_SUCC = New System.Windows.Forms.CheckBox()
         Me.txt_Log = New System.Windows.Forms.TextBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
-        Me.status_prg_Errors = New System.Windows.Forms.ToolStripProgressBar()
         Me.status_lbl_Errors = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.status_prg_Errors = New System.Windows.Forms.ToolStripProgressBar()
+        Me.chk_Settings_UseLongSystemInTag = New System.Windows.Forms.CheckBox()
         Me.grp_Settings.SuspendLayout()
         CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ctx_Settings_CreateSubdirectories.SuspendLayout()
@@ -75,6 +77,7 @@ Partial Class frm_Main
         '
         Me.grp_Settings.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.grp_Settings.Controls.Add(Me.chk_Settings_UseLongSystemInTag)
         Me.grp_Settings.Controls.Add(Me.num_Settings_MaxErrors)
         Me.grp_Settings.Controls.Add(Me.lbl_Settings_MaxErrors)
         Me.grp_Settings.Controls.Add(Me.btn_Settings_CreateSubdirectories)
@@ -87,7 +90,7 @@ Partial Class frm_Main
         Me.grp_Settings.Controls.Add(Me.txt_Settings_DownloadTo)
         Me.grp_Settings.Location = New System.Drawing.Point(12, 12)
         Me.grp_Settings.Name = "grp_Settings"
-        Me.grp_Settings.Size = New System.Drawing.Size(560, 122)
+        Me.grp_Settings.Size = New System.Drawing.Size(560, 166)
         Me.grp_Settings.TabIndex = 0
         Me.grp_Settings.TabStop = False
         Me.grp_Settings.Text = "Settings"
@@ -190,7 +193,7 @@ Partial Class frm_Main
         '
         Me.btn_Download.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Download.Location = New System.Drawing.Point(12, 140)
+        Me.btn_Download.Location = New System.Drawing.Point(12, 212)
         Me.btn_Download.Name = "btn_Download"
         Me.btn_Download.Size = New System.Drawing.Size(433, 46)
         Me.btn_Download.TabIndex = 2
@@ -200,7 +203,7 @@ Partial Class frm_Main
         'btn_Cancel
         '
         Me.btn_Cancel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Cancel.Location = New System.Drawing.Point(458, 140)
+        Me.btn_Cancel.Location = New System.Drawing.Point(458, 212)
         Me.btn_Cancel.Name = "btn_Cancel"
         Me.btn_Cancel.Size = New System.Drawing.Size(114, 46)
         Me.btn_Cancel.TabIndex = 3
@@ -209,9 +212,9 @@ Partial Class frm_Main
         '
         'ctx_Settings_CreateSubdirectories
         '
-        Me.ctx_Settings_CreateSubdirectories.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnu_mp3file, Me.ToolStripSeparator1, Me.mnu_GameComposer, Me.mnu_GameName, Me.mnu_GameSong, Me.mnu_GameSystem, Me.mnu_GameOrganisation, Me.mnu_GameYear, Me.ToolStripSeparator2, Me.mnu_RemixId, Me.mnu_RemixName, Me.mnu_RemixPosted, Me.mnu_RemixRemixer, Me.ToolStripSeparator3, Me.mnu_Tags_Genre, Me.mnu_TagsInstrument, Me.mnu_TagsMood})
+        Me.ctx_Settings_CreateSubdirectories.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnu_mp3file, Me.ToolStripSeparator1, Me.mnu_GameComposer, Me.mnu_GameName, Me.mnu_GameSong, Me.mnu_GameSystem, Me.mnu_GameSystemLong, Me.mnu_GameOrganisation, Me.mnu_GameYear, Me.ToolStripSeparator2, Me.mnu_RemixId, Me.mnu_RemixName, Me.mnu_RemixPosted, Me.mnu_RemixRemixer, Me.ToolStripSeparator3, Me.mnu_Tags_Genre, Me.mnu_TagsInstrument, Me.mnu_TagsMood})
         Me.ctx_Settings_CreateSubdirectories.Name = "ctx_Settings_CreateSubdirectories"
-        Me.ctx_Settings_CreateSubdirectories.Size = New System.Drawing.Size(196, 330)
+        Me.ctx_Settings_CreateSubdirectories.Size = New System.Drawing.Size(196, 352)
         '
         'mnu_mp3file
         '
@@ -251,6 +254,12 @@ Partial Class frm_Main
         Me.mnu_GameSystem.Size = New System.Drawing.Size(195, 22)
         Me.mnu_GameSystem.Text = "%game_system%"
         Me.mnu_GameSystem.ToolTipText = "The system the game was released on"
+        '
+        'mnu_GameSystemLong
+        '
+        Me.mnu_GameSystemLong.Name = "mnu_GameSystemLong"
+        Me.mnu_GameSystemLong.Size = New System.Drawing.Size(195, 22)
+        Me.mnu_GameSystemLong.Text = "%game_system_long%"
         '
         'mnu_GameOrganisation
         '
@@ -333,9 +342,9 @@ Partial Class frm_Main
         Me.grp_Log.Controls.Add(Me.chk_Log_INFO)
         Me.grp_Log.Controls.Add(Me.chk_Log_SUCC)
         Me.grp_Log.Controls.Add(Me.txt_Log)
-        Me.grp_Log.Location = New System.Drawing.Point(12, 192)
+        Me.grp_Log.Location = New System.Drawing.Point(12, 293)
         Me.grp_Log.Name = "grp_Log"
-        Me.grp_Log.Size = New System.Drawing.Size(560, 316)
+        Me.grp_Log.Size = New System.Drawing.Size(560, 243)
         Me.grp_Log.TabIndex = 4
         Me.grp_Log.TabStop = False
         Me.grp_Log.Text = "Log"
@@ -398,7 +407,7 @@ Partial Class frm_Main
         Me.txt_Log.Location = New System.Drawing.Point(6, 43)
         Me.txt_Log.Multiline = True
         Me.txt_Log.Name = "txt_Log"
-        Me.txt_Log.Size = New System.Drawing.Size(548, 267)
+        Me.txt_Log.Size = New System.Drawing.Size(548, 194)
         Me.txt_Log.TabIndex = 2
         Me.txt_Log.WordWrap = False
         '
@@ -411,16 +420,26 @@ Partial Class frm_Main
         Me.StatusStrip1.TabIndex = 5
         Me.StatusStrip1.Text = "StatusStrip1"
         '
-        'status_prg_Errors
-        '
-        Me.status_prg_Errors.Name = "status_prg_Errors"
-        Me.status_prg_Errors.Size = New System.Drawing.Size(100, 16)
-        '
         'status_lbl_Errors
         '
         Me.status_lbl_Errors.Name = "status_lbl_Errors"
         Me.status_lbl_Errors.Size = New System.Drawing.Size(117, 17)
         Me.status_lbl_Errors.Text = "Consecutive Errors: 0"
+        '
+        'status_prg_Errors
+        '
+        Me.status_prg_Errors.Name = "status_prg_Errors"
+        Me.status_prg_Errors.Size = New System.Drawing.Size(100, 16)
+        '
+        'chk_Settings_UseLongSystemInTag
+        '
+        Me.chk_Settings_UseLongSystemInTag.AutoSize = True
+        Me.chk_Settings_UseLongSystemInTag.Location = New System.Drawing.Point(154, 118)
+        Me.chk_Settings_UseLongSystemInTag.Name = "chk_Settings_UseLongSystemInTag"
+        Me.chk_Settings_UseLongSystemInTag.Size = New System.Drawing.Size(263, 17)
+        Me.chk_Settings_UseLongSystemInTag.TabIndex = 10
+        Me.chk_Settings_UseLongSystemInTag.Text = "use long System name in Tag %ALBUM ARTIST%"
+        Me.chk_Settings_UseLongSystemInTag.UseVisualStyleBackColor = True
         '
         'frm_Main
         '
@@ -489,4 +508,6 @@ Partial Class frm_Main
     Friend WithEvents StatusStrip1 As StatusStrip
     Friend WithEvents status_lbl_Errors As ToolStripStatusLabel
     Friend WithEvents status_prg_Errors As ToolStripProgressBar
+    Friend WithEvents mnu_GameSystemLong As ToolStripMenuItem
+    Friend WithEvents chk_Settings_UseLongSystemInTag As CheckBox
 End Class
