@@ -24,6 +24,7 @@ Partial Class frm_Main
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.grp_Settings = New System.Windows.Forms.GroupBox()
+        Me.chk_Settings_UseLongSystemInTag = New System.Windows.Forms.CheckBox()
         Me.num_Settings_MaxErrors = New System.Windows.Forms.NumericUpDown()
         Me.lbl_Settings_MaxErrors = New System.Windows.Forms.Label()
         Me.btn_Settings_CreateSubdirectories = New System.Windows.Forms.Button()
@@ -65,7 +66,6 @@ Partial Class frm_Main
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.status_lbl_Errors = New System.Windows.Forms.ToolStripStatusLabel()
         Me.status_prg_Errors = New System.Windows.Forms.ToolStripProgressBar()
-        Me.chk_Settings_UseLongSystemInTag = New System.Windows.Forms.CheckBox()
         Me.grp_Settings.SuspendLayout()
         CType(Me.num_Settings_MaxErrors, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ctx_Settings_CreateSubdirectories.SuspendLayout()
@@ -90,10 +90,20 @@ Partial Class frm_Main
         Me.grp_Settings.Controls.Add(Me.txt_Settings_DownloadTo)
         Me.grp_Settings.Location = New System.Drawing.Point(12, 12)
         Me.grp_Settings.Name = "grp_Settings"
-        Me.grp_Settings.Size = New System.Drawing.Size(560, 166)
+        Me.grp_Settings.Size = New System.Drawing.Size(560, 139)
         Me.grp_Settings.TabIndex = 0
         Me.grp_Settings.TabStop = False
         Me.grp_Settings.Text = "Settings"
+        '
+        'chk_Settings_UseLongSystemInTag
+        '
+        Me.chk_Settings_UseLongSystemInTag.AutoSize = True
+        Me.chk_Settings_UseLongSystemInTag.Location = New System.Drawing.Point(154, 118)
+        Me.chk_Settings_UseLongSystemInTag.Name = "chk_Settings_UseLongSystemInTag"
+        Me.chk_Settings_UseLongSystemInTag.Size = New System.Drawing.Size(263, 17)
+        Me.chk_Settings_UseLongSystemInTag.TabIndex = 10
+        Me.chk_Settings_UseLongSystemInTag.Text = "use long System name in Tag %ALBUM ARTIST%"
+        Me.chk_Settings_UseLongSystemInTag.UseVisualStyleBackColor = True
         '
         'num_Settings_MaxErrors
         '
@@ -193,7 +203,7 @@ Partial Class frm_Main
         '
         Me.btn_Download.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Download.Location = New System.Drawing.Point(12, 212)
+        Me.btn_Download.Location = New System.Drawing.Point(12, 157)
         Me.btn_Download.Name = "btn_Download"
         Me.btn_Download.Size = New System.Drawing.Size(433, 46)
         Me.btn_Download.TabIndex = 2
@@ -203,7 +213,7 @@ Partial Class frm_Main
         'btn_Cancel
         '
         Me.btn_Cancel.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btn_Cancel.Location = New System.Drawing.Point(458, 212)
+        Me.btn_Cancel.Location = New System.Drawing.Point(458, 157)
         Me.btn_Cancel.Name = "btn_Cancel"
         Me.btn_Cancel.Size = New System.Drawing.Size(114, 46)
         Me.btn_Cancel.TabIndex = 3
@@ -342,9 +352,9 @@ Partial Class frm_Main
         Me.grp_Log.Controls.Add(Me.chk_Log_INFO)
         Me.grp_Log.Controls.Add(Me.chk_Log_SUCC)
         Me.grp_Log.Controls.Add(Me.txt_Log)
-        Me.grp_Log.Location = New System.Drawing.Point(12, 293)
+        Me.grp_Log.Location = New System.Drawing.Point(12, 209)
         Me.grp_Log.Name = "grp_Log"
-        Me.grp_Log.Size = New System.Drawing.Size(560, 243)
+        Me.grp_Log.Size = New System.Drawing.Size(560, 327)
         Me.grp_Log.TabIndex = 4
         Me.grp_Log.TabStop = False
         Me.grp_Log.Text = "Log"
@@ -407,7 +417,8 @@ Partial Class frm_Main
         Me.txt_Log.Location = New System.Drawing.Point(6, 43)
         Me.txt_Log.Multiline = True
         Me.txt_Log.Name = "txt_Log"
-        Me.txt_Log.Size = New System.Drawing.Size(548, 194)
+        Me.txt_Log.ScrollBars = System.Windows.Forms.ScrollBars.Both
+        Me.txt_Log.Size = New System.Drawing.Size(548, 278)
         Me.txt_Log.TabIndex = 2
         Me.txt_Log.WordWrap = False
         '
@@ -430,16 +441,6 @@ Partial Class frm_Main
         '
         Me.status_prg_Errors.Name = "status_prg_Errors"
         Me.status_prg_Errors.Size = New System.Drawing.Size(100, 16)
-        '
-        'chk_Settings_UseLongSystemInTag
-        '
-        Me.chk_Settings_UseLongSystemInTag.AutoSize = True
-        Me.chk_Settings_UseLongSystemInTag.Location = New System.Drawing.Point(154, 118)
-        Me.chk_Settings_UseLongSystemInTag.Name = "chk_Settings_UseLongSystemInTag"
-        Me.chk_Settings_UseLongSystemInTag.Size = New System.Drawing.Size(263, 17)
-        Me.chk_Settings_UseLongSystemInTag.TabIndex = 10
-        Me.chk_Settings_UseLongSystemInTag.Text = "use long System name in Tag %ALBUM ARTIST%"
-        Me.chk_Settings_UseLongSystemInTag.UseVisualStyleBackColor = True
         '
         'frm_Main
         '

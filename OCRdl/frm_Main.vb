@@ -24,6 +24,8 @@ Public Class frm_Main
         txt_Settings_CreateSubdirectories.Text = mySettings.CreateSubdirectories
         num_Settings_MaxErrors.Value = mySettings.MaxErrors
 
+        chk_Settings_UseLongSystemInTag.Checked = mySettings.useLongSystemNameInTag
+
         chk_Log_SUCC.Checked = mySettings.printSUCC
         chk_Log_INFO.Checked = mySettings.printINFO
         chk_Log_WARN.Checked = mySettings.printWARN
@@ -39,6 +41,8 @@ Public Class frm_Main
         myLog.add(MessageLevel.INFO, "OCRdl started, last success was " & mySettings.LastSuccess)
         status_lbl_Errors.Text = "Consecutive Errors: 0 / " & mySettings.MaxErrors
         status_prg_Errors.Maximum = mySettings.MaxErrors
+
+        btn_Cancel.Enabled = False
     End Sub
 
     Private Sub frm_Main_Closed(sender As Object, e As EventArgs) Handles Me.Closed
@@ -204,6 +208,10 @@ Public Class frm_Main
                 myLog.add(MessageLevel.ERROR, ex.Message, 2)
             Catch ex As SaveMetadataException
                 myLog.add(MessageLevel.ERROR, ex.Message, 2)
+            Catch ex As Exception
+                myLog.add(MessageLevel.ERROR, ex.Message, 2)
+
+                Exit Sub
             Finally
                 'System.Threading.Thread.Sleep(1000)
 

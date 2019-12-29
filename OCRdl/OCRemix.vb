@@ -302,6 +302,9 @@ Public Class OCRemix
             toFile = toFile.Replace(":", "_")
             toFile = toFile.Replace("/", "_")
             toFile = toFile.Replace("*", "_")
+            toFile = toFile.Replace("""", "")
+            toFile = toFile.Replace("?", "")
+            toFile = toFile.Replace("|", " ")
 
             toFile = mySettings.DownloadTo & "\" & toFile
         End If
@@ -309,10 +312,12 @@ Public Class OCRemix
         _mp3LocalFile = toFile
 
         ' create path to download file to
+        ' ToDo make this work with very long path
         Dim path As String = My.Computer.FileSystem.GetParentPath(toFile)
 
         If (My.Computer.FileSystem.DirectoryExists(path) = False) Then
             My.Computer.FileSystem.CreateDirectory(path)
+
         End If
 
         downLoadFile(Me._mp3Url, toFile)
