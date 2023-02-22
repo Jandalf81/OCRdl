@@ -208,14 +208,14 @@ Public Class OCRemix
             End If
 
             ' _GameName
-            _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
+            _GameName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix:<\/span><a href=""\/game\/.*?"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("game").Value
             _GameName = urlDecode(_GameName)
 
             ' _GameUrl
-            _GameUrl = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""(?'gameurl'\/game\/.*?)"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("gameurl").Value
+            _GameUrl = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix:<\/span><a href=""(?'gameurl'\/game\/.*?)"">(?'game'.*?)<\/a> "".*?"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("gameurl").Value
 
             ' _RemixName
-            _RemixName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix: <\/span><a href=""\/game\/.*?"">.*?<\/a> ""(?'remixname'.*?)"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("remixname").Value
+            _RemixName = Regex.Match(_HTMLSource, "<h1>\s?<span class=""color-secondary"">ReMix:<\/span><a href=""\/game\/.*?"">.*?<\/a> ""(?'remixname'.*?)"" <span class=""subtext"">\d{1,2}:\d{2}<\/span>\s*?<\/h1>", RegexOptions.IgnoreCase).Groups("remixname").Value
 
             ' _RemixRemixer
             temp = Regex.Match(_HTMLSource, "<h2>By <a href=""\/artist\/.*?"">.*?<\/a>\s*?<\/h2>", RegexOptions.IgnoreCase).Value
@@ -226,7 +226,7 @@ Public Class OCRemix
             Next
 
             ' _RemixPosted
-            _RemixPosted = Regex.Match(_HTMLSource, "<p class=""color-secondary"">Posted (?'posted'\d{4}-\d{2}-\d{2}), (<a href=""\/community\/topic\/\d{3,6}\/"" title=""views judges' decision"">)?evaluated", RegexOptions.IgnoreCase).Groups("posted").Value
+            _RemixPosted = Regex.Match(_HTMLSource, "<p class=""color-secondary"">Posted\s*?(?'posted'\d{4}-\d{2}-\d{2}), (<a href=""\/community\/topic\/\d{3,6}\/"" title=""views judges' decision"">)?evaluated", RegexOptions.IgnoreCase).Groups("posted").Value
 
             ' _GameSong
             temp = Regex.Match(_HTMLSource, "<h2>Arranging the music of (\d{1,3}|one) songs?\.\.\.<\/h2>\s*?<h3>.*?<\/h3>", RegexOptions.IgnoreCase).Value
@@ -237,17 +237,17 @@ Public Class OCRemix
             Next
 
             ' _GameOrganisation
-            _GameOrganisation = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, \d{4}", RegexOptions.IgnoreCase).Groups("gameorg").Value
+            _GameOrganisation = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>:\s*?<a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>\s*?, \d{4}", RegexOptions.IgnoreCase).Groups("gameorg").Value
 
             ' _GameYear
-            _GameYear = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system", RegexOptions.IgnoreCase).Groups("gameyear").Value
+            _GameYear = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>:\s*?<a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>\s*?, (?'gameyear'\d{4}),\s*?<a href=""\/system", RegexOptions.IgnoreCase).Groups("gameyear").Value
 
             ' _GameSystem
-            _GameSystem = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by", RegexOptions.IgnoreCase).Groups("gamesystem").Value
+            _GameSystem = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>:\s*?<a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>\s*?, (?'gameyear'\d{4}),\s*?<a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by", RegexOptions.IgnoreCase).Groups("gamesystem").Value
             Me.getSystemNameLong()
 
             ' _GameComposer
-            temp = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>: <a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>, (?'gameyear'\d{4}), <a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by (?'composer'<a href=""\/artist\/.*?<\/a>)\s*?<\/div>", RegexOptions.IgnoreCase).Groups("composer").Value
+            temp = Regex.Match(_HTMLSource, "<strong>Primary Game<\/strong>:\s*?<a href=""\/game\/.*?""><em>.*?<\/em><\/a> \(<a href=""\/org\/.*?"" class=""color-secondary"">(?'gameorg'.*?)<\/a>\s*?, (?'gameyear'\d{4}),\s*?<a href=""\/system\/.*?"" class=""color-secondary"">(?'gamesystem'.*?)<\/a>\), music by (?'composer'<a href=""\/artist\/.*?<\/a>)\s*?<\/div>", RegexOptions.IgnoreCase).Groups("composer").Value
             mc = Regex.Matches(temp, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>")
             For Each match As Match In mc
                 temp = Regex.Match(match.Value, "<a href=""\/artist\/.*?"">(?'composer'.*?)<\/a>", RegexOptions.IgnoreCase).Groups("composer").Value
